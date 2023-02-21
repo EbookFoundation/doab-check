@@ -75,6 +75,9 @@ def load_doab_record(doab_id, title, item_type, urls, timestamps, **kwargs):
     """
     logger.info('load doab %s', doab_id)
     (new_item, created) = Item.objects.get_or_create(doab=doab_id)
+    new_item.title = title
+    new_item.resource_type = item_type
+    new_item.save()
     new_record = Record.objects.create(item=new_item)
     for timestamp in timestamps:
         (new_timestamp, created) = Timestamp.objects.get_or_create(

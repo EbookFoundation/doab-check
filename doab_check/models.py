@@ -1,4 +1,5 @@
 
+from urllib.parse import urlparse
 
 from django.db import models
 
@@ -27,6 +28,17 @@ class Link(models.Model):
 
     # so we can set it to dead instead of deleting
     live = models.BooleanField(default=True)
+    
+    # derived from url so we can do sorting, etc.
+    provider = models.CharField(max_length=255, default='')
+    
+    def save(self, *args, **kwargs):
+        if self.url:
+            netloc = urlparse(self.url).netloc.lower()
+            if netloc.startswith('www.'):
+                netloc = netloc[4:]
+            self.provider = netloc
+        super().save(*args, **kwargs)
 
 class Timestamp(models.Model):
     ''' timestamp of the record returned by doab. records can have multiple timestamps '''
@@ -43,7 +55,7 @@ class Record(models.Model):
 class LinkRel(models.Model):
     ''' association between an item and a link '''
     # might be 'cover'
-    role = models.CharField(max_length=10, null=True)
+    role = models.CharField(max_length=10, default='identifier')
     link = models.ForeignKey("Link", related_name='related', on_delete=models.CASCADE)
     item = models.ForeignKey("Item", related_name='related', on_delete=models.CASCADE)
     
