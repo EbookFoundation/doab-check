@@ -16,6 +16,9 @@ class Item(models.Model):
     
     # titles can change
     title = models.CharField(max_length=1000)
+    
+    def __str__(self):
+        return self.doab.split('/')[1] if '/' in self.doab else self.doab
 
 class Link(models.Model):
     ''' these are the links we're going to check '''
@@ -24,7 +27,6 @@ class Link(models.Model):
 
     # the items reporting this link
     items = models.ManyToManyField("Item", related_name="links", db_index=True, through="LinkRel")
-
 
     # so we can set it to dead instead of deleting
     live = models.BooleanField(default=True)
@@ -40,17 +42,24 @@ class Link(models.Model):
             self.provider = netloc
         super().save(*args, **kwargs)
 
+
 class Timestamp(models.Model):
     ''' timestamp of the record returned by doab. records can have multiple timestamps '''
     created = models.DateTimeField(auto_now_add=True)
     datetime =  models.DateTimeField()
     record = models.ForeignKey("Record", related_name="timestamps", null=False,
                                on_delete=models.CASCADE)
+    def __str__(self):
+        return f'Record for {self.record.item} on {self.datetime}'
+
 
 class Record(models.Model):
     ''' a harvested record '''
     created = models.DateTimeField(auto_now_add=True)
     item = models.ForeignKey("Item", related_name="records", on_delete=models.CASCADE)
+    def __str__(self):
+        return f'Record for {self.item} harvested on {self.created}'
+    
 
 class LinkRel(models.Model):
     ''' association between an item and a link '''
