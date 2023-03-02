@@ -1,0 +1,27 @@
+<html>
+<head>
+<title>DOAB Hosts</title>
+</head>
+<body>
+<h2>
+Linkchecking for 
+{{provider.provider}} ({{provider.link_count}}) 
+</h2>
+<ul>
+{% for link in links %}
+<li>
+<a href="{{link.url}}">{{link.url}}</a>
+<table>
+{% for check  in link.checks.all %}
+<tr>
+<td>{{ check.created }}</td>
+<td {% if check.return_code != 200 %} style="color:red"{% endif %}>{{ check.return_code }}</td>
+<td>{{check.content_type}}</td>
+</tr>
+{% endfor %}
+</table>
+</li>
+{% endfor %}
+</ul>
+</body>
+</html>

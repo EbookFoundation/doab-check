@@ -1,0 +1,12 @@
+<html>
+<head>
+<title>DOAB Hosts</title>
+</head>
+<body>
+<ul>
+{% for provider in provider_list %}
+<li><a href="{%  url 'provider' provider.provider %}">{{provider.provider}}</a> ({{provider.link_count}})</li>
+{% endfor %}
+</ul>
+</body>
+</html>
