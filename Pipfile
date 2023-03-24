@@ -9,8 +9,9 @@ psycopg2 = "*"
 pyoai = "*"
 requests = "*"
 gunicorn = "*"
+doab-check = {editable = true, path = "."}
 
 [dev-packages]
 
 [requires]
-python_version = "3.9"
+python_version = ">3.9"
