@@ -25,7 +25,7 @@ class ProviderView(generic.TemplateView):
     def get_context_data(self, **kwargs):
         prov = kwargs['provider']
         provider = {'provider': prov}
-        provider_links = Link.objects.filter(provider=prov, active=True)
+        provider_links = Link.objects.filter(provider=prov, live=True)
         provider['link_count'] = provider_links.count()
         
         return {'provider': provider, 'links': provider_links}
