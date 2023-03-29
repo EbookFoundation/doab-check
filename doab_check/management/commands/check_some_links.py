@@ -1,5 +1,8 @@
 import datetime
+import logging
 from django.core.management.base import BaseCommand
+
+logger = logging.getLogger(__name__)
 
 from doab_check.check import check_link
 from doab_check.models import Link
@@ -19,3 +22,4 @@ class Command(BaseCommand):
             if n_checked >= max:
                 break
         self.stdout.write(f'checked {n_checked} links')
+        logger.info(f'checked {n_checked} links')

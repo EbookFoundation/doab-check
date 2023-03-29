@@ -9,8 +9,12 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
+import logging
+import logging.handlers
 import os
 from pathlib import Path
+
+logging.handlers = logging.handlers
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -106,3 +110,23 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 USER_AGENT = "doab_check_bot v0.0.1 <https://github.com/EbookFoundation/doab_check>"
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'maxBytes': 1024*1024*5, # 5 MB
+            'backupCount': 5,
+            'filename': 'logs/doabcheck.log',
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
