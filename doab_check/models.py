@@ -14,8 +14,9 @@ class Item(models.Model):
     # book, chapter, etc.
     resource_type = models.CharField(max_length=20, null=True)
     
-    # titles can change
+    # titles, publisher name can change
     title = models.CharField(max_length=1000)
+    publisher_name = models.CharField(max_length=1000)
     
     def __str__(self):
         return self.doab.split('/')[1] if '/' in self.doab else self.doab

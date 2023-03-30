@@ -54,11 +54,13 @@ def add_by_doab(doab_id, record=None):
             if ident.startswith('http'):
                 urls.append(ident)
         title = unlist(metadata.pop('title', ['']))
+        publisher_name = unlist(metadata.pop('publisher', ['']))
         item_type = unlist(metadata.pop('type', []))
         timestamps = metadata.pop('timestamp', [])
         added_record = load_doab_record(
             doab_id,
             title,
+            publisher_name,
             item_type,
             urls,
             timestamps,
@@ -69,13 +71,14 @@ def add_by_doab(doab_id, record=None):
         logger.error(e)
         return None
 
-def load_doab_record(doab_id, title, item_type, urls, timestamps, **kwargs):
+def load_doab_record(doab_id, title, publisher_name, item_type, urls, timestamps, **kwargs):
     """
     create a record from doabooks.org represented by input parameters 
     """
     logger.info('load doab %s', doab_id)
     (new_item, created) = Item.objects.get_or_create(doab=doab_id)
     new_item.title = title
+    new_item.publisher_name = publisher_name
     new_item.resource_type = item_type
     new_item.save()
     new_record = Record.objects.create(item=new_item)
