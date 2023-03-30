@@ -1,0 +1,15 @@
+<html>
+<head>
+<title>DOAB Publishers</title>
+</head>
+<body>
+<h2>
+DOAB Linkchecking by Publisher
+</h2>
+<ul>
+{% for publisher in publisher_list %}
+<li><a href="{%  url 'publisher' publisher.publisher_name %}">{{publisher.publisher_name}}</a> ({{publisher.item_count}})</li>
+{% endfor %}
+</ul>
+</body>
+</html>

@@ -11,4 +11,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('providers/', views.ProvidersView.as_view(), name='providers'),
     path('providers/<str:provider>/', views.ProviderView.as_view(), name='provider'),
+    path('publishers/', views.PublishersView.as_view(), name='publishers'),
+    path('publishers/<str:publisher>/', views.PublisherView.as_view(), name='publisher'),
 ]

@@ -21,6 +21,10 @@ class Item(models.Model):
     def __str__(self):
         return self.doab.split('/')[1] if '/' in self.doab else self.doab
 
+    @property
+    def url(self):
+        return f'https://directory.doabooks.org/handle/{self.doab}'
+
 class Link(models.Model):
     ''' these are the links we're going to check '''
     url = models.URLField(max_length=1024, unique=True)

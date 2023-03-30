@@ -1,0 +1,39 @@
+<html>
+<head>
+<title>DOAB Link Checking for {{ publisher.publisher }}</title>
+</head>
+<body>
+<h2>
+DOAB Linkchecking for 
+{{ publisher.publisher }} ({{ items.count }} records) 
+</h2>
+<ul>
+{% for item in items %}
+<li>
+<a href="{{ item.url }}">{{ item.doab }}</a> -  {{ item.title }}
+{% for link in item.links.all %}
+    <table>
+    <tr>
+    <th>
+    <a href="{{ link.url }}">{{ link.url }}</a>
+    </th>
+    <tr>
+    <td>
+        <table>
+        {% for check  in link.checks.all %}
+        <tr {% if check.return_code != 200 %} style="color:red"{% endif %}>
+        <td>{{ check.created }}</td>
+        <td>{{ check.return_code }}</td>
+        <td>{{ check.content_type }}</td>
+        </tr>
+        {% endfor %}
+        </table>
+    </td>
+    </tr>
+    {% endfor %}
+    </table>
+</li>
+{% endfor %}
+</ul>
+</body>
+</html>
