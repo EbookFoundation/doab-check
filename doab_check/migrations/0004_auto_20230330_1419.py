@@ -26,7 +26,8 @@ class Migration(migrations.Migration):
                     return ''
                 metadata = record[1].getMap()
                 item.publisher_name = unlist(metadata.pop('publisher', ['']))
-                item.save()
+                if item.publisher_name:
+                    item.save()
             except IdDoesNotExistError as e:
                 logger.error(e)
                 return ''
