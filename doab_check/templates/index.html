@@ -1,3 +1,4 @@
+{% load static %}
 <html>
 <head>
 <title>DOAB Check</title>
@@ -6,9 +7,11 @@
 <h1>
 Welcome to DOAB Check!
 </h1>
-<p >
-<img style='height:40px; margin-left:auto; margin-right:auto' src='/static/fef_logo_large.png'>
-<br>
+<p>
+<img style='height:5em; padding:1em; margin-bottom: 1em' src='{% static "fef_logo_large.png" %}' alt='FEF logo'>
+<img style='height:5em;  padding:1em; margin-bottom: 1em' src='{% static "doab.png" %}' alt='DOAB logo'>
+</p
+><p>
 DOAB Check is a collaboration between the Free Ebook Foundation and the Directory of Open Access Books. It checks all the links in DOAB, looking for any links that are broken or misconfigured.
 </p>
 <p>
