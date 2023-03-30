@@ -1,8 +1,12 @@
 <html>
 <head>
-<title>DOAB Hosts</title>
+<title>DOAB Hostnames</title>
 </head>
 <body>
+<h2>
+DOAB Linkchecking by Hostnames
+</h2>
+
 <ul>
 {% for provider in provider_list %}
 <li><a href="{%  url 'provider' provider.provider %}">{{provider.provider}}</a> ({{provider.link_count}})</li>
