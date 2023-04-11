@@ -32,6 +32,9 @@ class ContentTyper(object):
             if r.status_code == 405:
                 r =  requests.get(url, headers=HEADERS)
             return r
+        except requests.exceptions.SSLError:
+            r =  requests.get(url, verify=False)
+            r.status_code = 511
         except:
             # unexplained error
             return None
