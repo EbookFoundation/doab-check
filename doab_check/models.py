@@ -73,7 +73,7 @@ class Check(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     link = models.ForeignKey("Link", related_name='checks', on_delete=models.CASCADE)
     return_code = models.IntegerField()
-    content_type = models.CharField(max_length=30, null=True)
+    content_type = models.CharField(max_length=255, null=True)
     location = models.ForeignKey("Link", related_name='redirects_from', null=True,
                                  on_delete=models.SET_NULL)
     
