@@ -33,17 +33,14 @@ class LinkAdmin(admin.ModelAdmin):
         return mark_safe(f'<a href="{obj.url}">{obj.url}</a>')
 
 @admin.register(models.LinkRel)
-class LinkAdmin(admin.ModelAdmin):
+class LinkRelAdmin(admin.ModelAdmin):
     list_display = ('role', 'doab', 'url',)
-    readonly_fields = ('doab', 'url')
+    readonly_fields = ('item', 'link')
     search_fields = ['link__url']
     def doab(self, obj):
         return mark_safe(f'<a href="/admin/doab_check/item/{obj.item.id}/">{obj.item}</a>')
     def url(self, obj):
         return mark_safe(f'<a href="/admin/doab_check/link/{obj.link.id}/">{obj.link.url}</a>')
 
-@admin.register(models.Record)
-class RecordAdmin(admin.ModelAdmin):
-    readonly_fields = ['item']
 
 

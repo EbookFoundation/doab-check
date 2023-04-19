@@ -12,10 +12,10 @@ from oaipmh.metadata import MetadataRegistry
 import requests
 
 from .doab_utils import doab_reader
-from .models import Item, Link, Record, Timestamp
+from .models import Item, Link, Timestamp
 
 DOAB_OAIURL = 'https://directory.doabooks.org/oai/request'
-DOAB_PATT = re.compile(r'oai:directory\.doabooks\.org:(.*)')
+DOAB_PATT = re.compile(r'oai:(directory\.doabooks\.org|doab-books):(.*)')
 
 logger = logging.getLogger(__name__)
 
@@ -29,10 +29,12 @@ def unlist(alist):
         return None
     return alist[0]
 
-def getdoab(url):
+def getdoab(url, new_ns=False):
     id_match = DOAB_PATT.search(url)
     if id_match:
-        return f'oai:doab-books:{id_match.group(1)}'
+        if new_ns:
+            return f'oai:directory.doabooks.org:{id_match.group(2)}'
+        return f'oai:doab-books:{id_match.group(2)}'
     return False
 
 
@@ -40,7 +42,7 @@ def add_by_doab(doab_id, record=None):
     try:
         record = record if record else doab_client.getRecord(
             metadataPrefix='oai_dc',
-            identifier=doab_id
+            identifier=getdoab(doab_id, new_ns=True)
         )
         if record[0].isDeleted() or not record[1]:
             logger.warning('record %s has no content or is deleted', record)
@@ -57,7 +59,7 @@ def add_by_doab(doab_id, record=None):
         publisher_name = unlist(metadata.pop('publisher', ['']))
         item_type = unlist(metadata.pop('type', []))
         timestamps = metadata.pop('timestamp', [])
-        added_record = load_doab_record(
+        added_item = load_doab_record(
             doab_id,
             title,
             publisher_name,
@@ -66,7 +68,7 @@ def add_by_doab(doab_id, record=None):
             timestamps,
             **metadata
         )
-        return added_record
+        return added_item
     except IdDoesNotExistError as e:
         logger.error(e)
         return None
@@ -81,16 +83,20 @@ def load_doab_record(doab_id, title, publisher_name, item_type, urls, timestamps
     new_item.publisher_name = publisher_name
     new_item.resource_type = item_type
     new_item.save()
-    new_record = Record.objects.create(item=new_item)
     for timestamp in timestamps:
         (new_timestamp, created) = Timestamp.objects.get_or_create(
             datetime=timestamp,
-            record=new_record)
+            item=new_item)
     for url in urls:
         url = url.strip()
         (link, created) = Link.objects.get_or_create(url=url)
         link.items.add(new_item)
-    return new_record
+    for linkrel in new_item.related.filter(role='identifier'):
+        if linkrel.link.url in urls:
+            linkrel.status = 1
+        else:
+            linkrel.status = 0
+    return new_item
         
 
 def set_deleted(record):
@@ -101,6 +107,9 @@ def set_deleted(record):
             item = Item.objects.get(doab=doab)
             item.status = 0
             item.save()
+            for linkrel in item.related.all():
+                linkrel.status = 0
+                linkrel.save()
             return item
         except Item.DoesNotExist:
             logger.warning(f'no item {doab}')
@@ -134,13 +143,13 @@ def load_doab_oai(from_date, until_date, limit=100):
             doab = getdoab(ident)
             if doab:
                 num_doabs += 1
-                rec = add_by_doab(doab, record=record)
-                if not rec:
+                item = add_by_doab(doab, record=record)
+                if not item:
                     logger.error('error for doab #%s', doab)
                     continue
                 if lasttime > start:
                     new_doabs += 1
-                title = rec.item.title
+                title = item.title
                 logger.info(u'updated:\t%s\t%s', doab, title)
             if num_doabs >= limit:
                 break

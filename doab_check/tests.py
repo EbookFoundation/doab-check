@@ -29,7 +29,11 @@ class HarvestTests(TestCase):
         add_by_doab(sample_doab)
         item = Item.objects.get(doab=sample_doab)
         self.assertTrue('Sieveking' in item.title)
-    
+        urls = []
+        for linkrel in item.related.filter(status=1):
+            urls.append(linkrel.link.url)
+        self.assertTrue('http://library.oapen.org/handle/20.500.12657/27590' in urls)
+
         # tweak the record to make it a delete record
         record = doab_client.getRecord(
                 metadataPrefix='oai_dc',
@@ -39,6 +43,7 @@ class HarvestTests(TestCase):
         add_by_doab(sample_doab, record=record)
         item = Item.objects.get(doab=sample_doab)
         self.assertTrue(item.status == 0)
+        self.assertTrue(item.related.filter(status=1).count() == 0)
     
     
     
