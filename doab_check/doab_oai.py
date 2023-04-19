@@ -62,7 +62,7 @@ def add_by_doab(doab_id, record=None):
         added_item = load_doab_record(
             doab_id,
             title,
-            publisher_name,
+            publisher_name if publisher_name else '',
             item_type,
             urls,
             timestamps,
@@ -80,7 +80,7 @@ def load_doab_record(doab_id, title, publisher_name, item_type, urls, timestamps
     logger.info('load doab %s', doab_id)
     (new_item, created) = Item.objects.get_or_create(doab=doab_id)
     new_item.title = title
-    new_item.publisher_name = publisher_name
+    new_item.publisher_name = publisher_name if publisher_name else ''
     new_item.resource_type = item_type
     new_item.save()
     for timestamp in timestamps:
