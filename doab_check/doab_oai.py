@@ -147,7 +147,7 @@ def load_doab_oai(from_date, until_date, limit=100):
                 if not item:
                     logger.error('error for doab #%s', doab)
                     continue
-                if item.created > start:
+                if lasttime > start:
                     new_doabs += 1
                 title = item.title
                 logger.info(u'updated:\t%s\t%s', doab, title)
