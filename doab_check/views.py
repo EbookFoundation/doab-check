@@ -37,7 +37,7 @@ class PublishersView(generic.TemplateView):
         publishers = Item.objects.order_by('publisher_name').values('publisher_name').distinct()
         for publisher in publishers:
             publisher['item_count'] = Item.objects.filter(
-                publisher_name=publisher['publisher_name']).count()
+                publisher_name=publisher['publisher_name'], status=1).count()
         return {'publisher_list': publishers}
 
 class PublisherView(generic.TemplateView):
@@ -46,7 +46,7 @@ class PublisherView(generic.TemplateView):
     def get_context_data(self, **kwargs):
         pub = kwargs['publisher']
         publisher = {'publisher': pub}
-        publisher_items = Item.objects.filter(publisher_name=pub)
+        publisher_items = Item.objects.filter(publisher_name=pub, status=1)
         publisher['link_count'] = publisher_items.count()
         
         return {'publisher': publisher, 'items': publisher_items}

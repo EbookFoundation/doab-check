@@ -18,7 +18,7 @@ class CheckAdmin(admin.ModelAdmin):
 
 @admin.register(models.Item)
 class ItemAdmin(admin.ModelAdmin):
-    list_display = (str, 'title', 'resource_type')
+    list_display = (str, 'title', 'resource_type', 'status')
     date_hierarchy = 'created'
     search_fields = ['title']
 

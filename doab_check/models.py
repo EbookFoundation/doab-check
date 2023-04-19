@@ -17,7 +17,8 @@ class Item(models.Model):
     # titles, publisher name can change
     title = models.CharField(max_length=1000, default='')
     publisher_name = models.CharField(max_length=1000, default='')
-    
+    status = models.IntegerField(default=1) # 0 if deleted
+
     def __str__(self):
         return self.doab.split('/')[1] if '/' in self.doab else self.doab
 

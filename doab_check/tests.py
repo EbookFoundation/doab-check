@@ -1,6 +1,9 @@
 from django.test import TestCase
 from django.test.client import Client
 
+from .doab_oai import add_by_doab, doab_client
+from .models import Item
+
 class PageTests(TestCase):
     fixtures = ['testdata.json',]
 
@@ -18,3 +21,24 @@ class PageTests(TestCase):
         self.assertEqual(r.status_code, 200)
         r = self.client.get("/providers/elibrary.duncker-humblot.com/")
         self.assertEqual(r.status_code, 200)
+
+
+sample_doab = 'oai:doab-books:20.500.12854/25850'
+class HarvestTests(TestCase):
+    def test_add(self):
+        add_by_doab(sample_doab)
+        item = Item.objects.get(doab=sample_doab)
+        self.assertTrue('Sieveking' in item.title)
+    
+        # tweak the record to make it a delete record
+        record = doab_client.getRecord(
+                metadataPrefix='oai_dc',
+                identifier=sample_doab
+            )
+        record[0]._deleted = True
+        add_by_doab(sample_doab, record=record)
+        item = Item.objects.get(doab=sample_doab)
+        self.assertTrue(item.status == 0)
+    
+    
+    

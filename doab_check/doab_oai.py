@@ -42,9 +42,9 @@ def add_by_doab(doab_id, record=None):
             metadataPrefix='oai_dc',
             identifier=doab_id
         )
-        if not record[1]:
-            logger.error('No content in record %s', record)
-            return None
+        if record[0].isDeleted() or not record[1]:
+            logger.warning('record %s has no content or is deleted', record)
+            return set_deleted(record)
         metadata = record[1].getMap()
         urls = []
         for ident in metadata.pop('identifier', []):
@@ -93,6 +93,19 @@ def load_doab_record(doab_id, title, publisher_name, item_type, urls, timestamps
     return new_record
         
 
+def set_deleted(record):
+    if record[0].isDeleted():
+        ident = record[0].identifier()
+        doab = getdoab(ident)
+        try:
+            item = Item.objects.get(doab=doab)
+            item.status = 0
+            item.save()
+            return item
+        except Item.DoesNotExist:
+            logger.warning(f'no item {doab}')
+            return None
+    
 
 def load_doab_oai(from_date, until_date, limit=100):
     '''
@@ -111,6 +124,8 @@ def load_doab_oai(from_date, until_date, limit=100):
         for record in doab_client.listRecords(metadataPrefix='oai_dc', from_=from_,
                                               until=until_date):
             if not record[1]:
+                # probably a deleted record
+                set_deleted(record)
                 continue
             item_type = unlist(record[1].getMap().get('type', None))
             ident = record[0].identifier()
