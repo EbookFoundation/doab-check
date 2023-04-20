@@ -14,6 +14,7 @@ class Command(BaseCommand):
         parser.add_argument('--max', nargs='?', type=int, default=1000, help="max checks")
 
     def handle(self, **options):
+        start_time = datetime.datetime.now()
         max = options['max']
         n_checked = 0
         for link in Link.objects.all().order_by('?'):
@@ -22,4 +23,7 @@ class Command(BaseCommand):
             if n_checked >= max:
                 break
         self.stdout.write(f'checked {n_checked} links')
-        logger.info(f'checked {n_checked} links')
+        end_time = datetime.datetime.now()
+        logger.info(f'checked {n_checked} links in {end_time - start_time}')
+        self.stdout.write(f'checked {n_checked} links in {end_time - start_time}')
+
