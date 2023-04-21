@@ -41,7 +41,6 @@ class Command(BaseCommand):
             except Item.DoesNotExist:
                 continue
 
-        self.stdout.write(f'checked {n_checked} links')
         end_time = datetime.datetime.now()
         logger.info(f'checked {l_checked} links in {end_time - start_time}')
         self.stdout.write(f'checked {l_checked} links for {n_checked} items in {end_time - start_time}')

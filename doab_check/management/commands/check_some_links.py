@@ -22,7 +22,6 @@ class Command(BaseCommand):
             n_checked += 1
             if n_checked >= max:
                 break
-        self.stdout.write(f'checked {n_checked} links')
         end_time = datetime.datetime.now()
         logger.info(f'checked {n_checked} links in {end_time - start_time}')
         self.stdout.write(f'checked {n_checked} links in {end_time - start_time}')

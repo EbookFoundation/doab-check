@@ -5,6 +5,10 @@ import datetime
 import logging
 import re
 
+import pytz
+from dateutil.parser import isoparse
+from dateutil.utils import default_tzinfo
+
 from oaipmh.client import Client
 from oaipmh.error import IdDoesNotExistError, NoRecordsMatchError
 from oaipmh.metadata import MetadataRegistry
@@ -84,6 +88,7 @@ def load_doab_record(doab_id, title, publisher_name, item_type, urls, timestamps
     new_item.resource_type = item_type
     new_item.save()
     for timestamp in timestamps:
+        timestamp = default_tzinfo(isoparse(timestamp), pytz.UTC)
         (new_timestamp, created) = Timestamp.objects.get_or_create(
             datetime=timestamp,
             item=new_item)
@@ -120,12 +125,12 @@ def load_doab_oai(from_date, until_date, limit=100):
     '''
     use oai feed to get oai updates
     '''
-    start = datetime.datetime.now()
+    start = datetime.datetime.now(pytz.UTC)
     if from_date:
         from_ = from_date
     else:
         # last 15 days
-        from_ = datetime.datetime.now() - datetime.timedelta(days=15)
+        from_ = datetime.datetime.now(pytz.UTC) - datetime.timedelta(days=15)
     num_doabs = 0
     new_doabs = 0
     lasttime = datetime.datetime(2000, 1, 1)
@@ -147,7 +152,7 @@ def load_doab_oai(from_date, until_date, limit=100):
                 if not item:
                     logger.error('error for doab #%s', doab)
                     continue
-                if lasttime > start:
+                if item.created > start:
                     new_doabs += 1
                 title = item.title
                 logger.info(u'updated:\t%s\t%s', doab, title)
