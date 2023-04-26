@@ -17,7 +17,7 @@ class Command(BaseCommand):
                             default=None, help="YYYY-MM-DD to start")
         parser.add_argument('--until', nargs='?', type=timefromiso,
                             default=None, help="YYYY-MM-DD to end")
-        parser.add_argument('--max', nargs='?', type=int, default=None, help="max desired records")
+        parser.add_argument('--max', nargs='?', type=int, default=1000, help="max desired records")
 
     def handle(self, from_date, **options):
         until_date = options['until']

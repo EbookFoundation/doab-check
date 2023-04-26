@@ -130,7 +130,7 @@ def load_doab_oai(from_date, until_date, limit=100):
         from_ = from_date
     else:
         # last 15 days
-        from_ = datetime.datetime.now(pytz.UTC) - datetime.timedelta(days=15)
+        from_ = datetime.datetime.now() - datetime.timedelta(days=7)
     num_doabs = 0
     new_doabs = 0
     lasttime = datetime.datetime(2000, 1, 1)
