@@ -48,5 +48,10 @@ class PublisherView(generic.TemplateView):
         publisher = {'publisher': pub}
         publisher_items = Item.objects.filter(publisher_name=pub, status=1)
         publisher['link_count'] = publisher_items.count()
+        if pub == '*** no publisher name ***':
+            pub = ''
+        publisher_items = Item.objects.filter(
+            publisher_name=pub, status=1,
+        )
         
         return {'publisher': publisher, 'items': publisher_items}

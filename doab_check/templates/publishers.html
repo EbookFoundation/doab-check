@@ -8,7 +8,7 @@ DOAB Linkchecking by Publisher
 </h2>
 <ul>
 {% for publisher in publisher_list %}
-<li><a href="{%  url 'publisher' publisher.publisher_name %}">
+<li><a href="{%  url 'publisher' publisher.publisher_name|default:'*** no publisher name ***' %}">
 {% if publisher.publisher_name %}{{publisher.publisher_name}}
 {% else %}*** no publisher name ***
 {% endif %}
