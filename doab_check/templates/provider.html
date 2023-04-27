@@ -18,6 +18,8 @@ Link Checking for
 <td> {{ code.recent_check__return_code }} </td>
 <td> {{ code.count }} </td>
 </tr>
+{% empty %}
+<tr><td colspan=2>None of the active links for {{ provider.provider }} have been checked.</td>
 {% endfor %}
 </table>
 

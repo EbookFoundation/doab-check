@@ -19,6 +19,8 @@ DOAB Linkchecking for
 <td> {{ code.links__recent_check__return_code }} </td>
 <td> {{ code.count }} </td>
 </tr>
+{% empty %}
+<tr><td colspan=2>None of the active links for {{ publisher.publisher }} have been checked.</td>
 {% endfor %}
 </table>
 
@@ -49,8 +51,6 @@ DOAB Linkchecking for
     {% endfor %}
     </table>
 </li>
-{% empty %}
-None of the active links for {{ publisher.publisher }} have been checked.
 {% endfor %}
 </ul>
 </body>
