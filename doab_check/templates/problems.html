@@ -1,0 +1,26 @@
+<html>
+<head>
+<title>DOAB Problem Links</title>
+</head>
+<body>
+<h2>
+DOAB links with apparent problems
+</h2>
+
+<ul>
+{% for link in problem_list %}
+<li>
+<p><a href="{{link.url}}">{{link.url}}</a>  ({{link.items.first.publisher_name}})
+<table>
+{% for check  in link.recent_checks %}
+<tr>
+<td>{{ check.created }}</td>
+<td {% if check.return_code != 200 %} style="color:red"{% endif %}>{{ check.return_code }}</td>
+<td>{{check.content_type}}</td>
+{% endfor %}
+</table>
+</li>
+{% endfor %}
+</ul>
+</body>
+</html>

@@ -12,15 +12,29 @@ Welcome to DOAB Check!
 <img style='height:5em;  padding:1em; margin-bottom: 1em' src='{% static "doab.png" %}' alt='DOAB logo'>
 </p
 ><p>
-DOAB Check is a collaboration between the Free Ebook Foundation and the Directory of Open Access Books. It checks all the links in DOAB, looking for any links that are broken or misconfigured.
+DOAB Check is a collaboration between the Free Ebook Foundation and the Directory of Open Access Books. It checks each the links in DOAB about once a month, looking for any links that are broken or misconfigured.
 </p>
 <p>
 We've grouped the links by the hostname for the links url to make it easier for publishers to see whether links they've entered into the DOAB database are working as suspected. 
 </p>
 <p>
-When a link is checked we record the status code returned by the web server. "404" means to link is broken. "403" indicates a misconfigured server that is not allowing access to the promised resource. "500" means something has gone wrong. "None" means something has gone terribly wrong.
+When a link is checked we record the status code returned by the web server. 
 </p>
 <ul>
+<li>"403" indicates a misconfigured server that is not allowing access to the promised resource. 
+<li>"404" means the link is broken - the resource is not found.
+<li>"500" means something has gone wrong.
+<li>"503" means that a website couldn’t be reached. This could happen because the server was too busy, under maintenance, or something else.
+<li>"503" means that a website couldn’t be reached. This could happen because the server was too busy, under maintenance, or something else.
+<li>"511" indicates a problem with the security of the connection - most often an incomplete certificate.
+<li>"None" or "0" means something has gone terribly wrong.
+</ul>
+
+We have a few ways to view the results.
+<ul>
+<li>
+View <a href="{% url 'problems' %}">the links which appear to have problems</a>.
+</li>
 <li>
 View <a href="{% url 'providers' %}">the list of host names we've checked</a>.
 </li>
@@ -28,6 +42,19 @@ View <a href="{% url 'providers' %}">the list of host names we've checked</a>.
 View <a href="{% url 'publishers' %}">the list of publishers whose links we've checked</a>.
 </li>
 </ul>
-We'll be adding more views of the link checking data as the project develops.
+<h3>Summary of link checks</h3>
+<table>
+<tr>
+<th>HTTP code</th>
+<th>number of links</th>
+</tr>
+{% for code in codes %}
+<tr {% if code.recent_check__return_code != 200 %} style="color:red"{% endif %}>
+<td> {{ code.recent_check__return_code }} </td>
+<td> {{ code.count }} </td>
+</tr>
+{% endfor %}
+</table>
+
 </body>
 </html>
