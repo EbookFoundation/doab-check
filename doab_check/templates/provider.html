@@ -4,15 +4,30 @@
 </head>
 <body>
 <h2>
-Linkchecking for 
-{{provider.provider}} ({{provider.link_count}}) 
+Link Checking for 
+{{provider.provider}} ({{provider.link_count}} links) 
 </h2>
+<h3>Summary</h3>
+<table>
+<tr>
+<th>HTTP Code</th>
+<th>number</th>
+</tr>
+{% for code in codes %}
+<tr {% if code.recent_check__return_code != 200 %} style="color:red"{% endif %}>
+<td> {{ code.recent_check__return_code }} </td>
+<td> {{ code.count }} </td>
+</tr>
+{% endfor %}
+</table>
+
+<h3>Checked links</h3>
 <ul>
 {% for link in links %}
 <li>
 <a href="{{link.url}}">{{link.url}}</a>
 <table>
-{% for check  in link.checks.all %}
+{% for check  in link.recent_checks %}
 <tr>
 <td>{{ check.created }}</td>
 <td {% if check.return_code != 200 %} style="color:red"{% endif %}>{{ check.return_code }}</td>

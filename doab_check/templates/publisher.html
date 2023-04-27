@@ -5,8 +5,24 @@
 <body>
 <h2>
 DOAB Linkchecking for 
-{{ publisher.publisher }} ({{ items.count }} records) 
+{{ publisher.publisher }} ({{ publisher.item_count|default:0 }} records)
 </h2>
+
+<h3>Link checking summary</h3>
+<table>
+<tr>
+<th>HTTP Code</th>
+<th>number</th>
+</tr>
+{% for code in codes %}
+<tr {% if code.links__recent_check__return_code != 200 %} style="color:red"{% endif %}>
+<td> {{ code.links__recent_check__return_code }} </td>
+<td> {{ code.count }} </td>
+</tr>
+{% endfor %}
+</table>
+
+<h3>Items with checked links</h3>
 <ul>
 {% for item in items %}
 <li>
@@ -20,9 +36,9 @@ DOAB Linkchecking for
     <tr>
     <td>
         <table>
-        {% for check  in link.checks.all %}
+        {% for check in link.recent_checks %}
         <tr {% if check.return_code != 200 %} style="color:red"{% endif %}>
-        <td>{{ check.created }}</td>
+        <td>{{ check.created }}:</td>
         <td>{{ check.return_code }}</td>
         <td>{{ check.content_type }}</td>
         </tr>
@@ -33,6 +49,8 @@ DOAB Linkchecking for
     {% endfor %}
     </table>
 </li>
+{% empty %}
+None of the active links for {{ publisher.publisher }} have been checked.
 {% endfor %}
 </ul>
 </body>
