@@ -118,5 +118,7 @@ def check_link(link):
     check.return_code = code
     check.content_type = ct
     check.save()
+    check.link.recent_check = check
+    check.link.save()
     
     

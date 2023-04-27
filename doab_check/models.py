@@ -40,6 +40,12 @@ class Link(models.Model):
     # derived from url so we can do sorting, etc.
     provider = models.CharField(max_length=255, default='')
     
+    recent_check = models.ForeignKey("Check", null=True, related_name='checked_link',
+        on_delete=models.SET_NULL)
+    
+    def recent_checks(self):
+        return self.checks.order_by('-created')
+    
     def save(self, *args, **kwargs):
         if self.url:
             netloc = urlparse(self.url).netloc.lower()
