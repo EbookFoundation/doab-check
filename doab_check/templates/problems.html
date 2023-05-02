@@ -4,11 +4,21 @@
 </head>
 <body>
 <h2>
-DOAB links with apparent problems
+DOAB links with Status code: {{ code | default:'0 or None' }}
 </h2>
-
 <ul>
-{% for link in problem_list %}
+{% for provider in providers %}
+<li> <a href="#{{ provider.provider | urlencode }}">{{ provider.provider }}</a>:
+     {{ provider.count }} problem links </li>
+{% endfor %}
+</ul>
+
+<dl>
+{% for provider in providers %}
+<dt id="{{ provider.provider | urlencode }}"><h3>{{ provider.provider }}</h3></dt>
+<dd>
+<ul>
+{% for link in provider.links %}
 <li>
 <p><a href="{{link.url}}">{{link.url}}</a>  ({{link.items.first.publisher_name}})
 <table>
@@ -22,5 +32,8 @@ DOAB links with apparent problems
 </li>
 {% endfor %}
 </ul>
+</dd>
+{% endfor %}
+</dl>
 </body>
 </html>

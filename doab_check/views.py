@@ -14,24 +14,32 @@ class HomepageView(generic.TemplateView):
     template_name = 'index.html'
 
     def get_context_data(self, **kwargs):
-        codes = Link.objects.filter(recent_check__isnull=False).order_by('-recent_check__return_code').values(
+        codes = Link.objects.filter(recent_check__isnull=False).order_by(
+            '-recent_check__return_code').values(
             'recent_check__return_code').distinct()
+        num_checked = Link.objects.filter(
+                recent_check__return_code__isnull=False).distinct().count()
         for code in codes:
             code['count'] = Link.objects.filter(
                 recent_check__return_code=code['recent_check__return_code'],
             ).distinct().count()
-        return {'codes': codes}
+            code['percent'] = '{:.2%}'.format(code['count'] / num_checked)
+        return {'num_checked': num_checked, 'codes': codes}
 
 
 class ProblemsView(generic.TemplateView):
     template_name = 'problems.html'
 
     def get_context_data(self, **kwargs):
-        problems = Link.objects.exclude(
-            recent_check__return_code__exact=200).exclude(recent_check__isnull=True
-        ).order_by(
-            '-recent_check__return_code', 'provider')
-        return {'problem_list': problems}
+        code = kwargs['code']
+        
+        problems = Link.objects.exclude(recent_check__isnull=True).filter(
+            recent_check__return_code__exact=code).order_by('provider')
+        providers = problems.values('provider').distinct()
+        for provider in providers:
+            provider['links'] = problems.filter(provider=provider['provider'])
+            provider['count'] = provider['links'].count()
+        return {'code': code, 'providers': providers}
 
 
 class ProvidersView(generic.TemplateView):
