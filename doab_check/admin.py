@@ -3,7 +3,8 @@ from django.utils.safestring import mark_safe
 
 # Register your models here.
 
-from . import models 
+from . import models
+from .check import check_link
 
 
 @admin.register(models.Check)
@@ -22,6 +23,7 @@ class ItemAdmin(admin.ModelAdmin):
     date_hierarchy = 'created'
     search_fields = ['title']
 
+
 @admin.register(models.Link)
 class LinkAdmin(admin.ModelAdmin):
     list_display = ('url', 'provider')
@@ -29,8 +31,16 @@ class LinkAdmin(admin.ModelAdmin):
     search_fields = ['url']
     exclude = ['url']
     readonly_fields = ('link_display', 'provider')
+    actions = ['recheck']
+    
+    @admin.action(description="Recheck the links")
+    def recheck(self, request, queryset):
+        for link in queryset:
+            check_link(link)
+
     def link_display(self, obj):
         return mark_safe(f'<a href="{obj.url}">{obj.url}</a>')
+    
 
 @admin.register(models.LinkRel)
 class LinkRelAdmin(admin.ModelAdmin):
