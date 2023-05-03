@@ -42,7 +42,7 @@ When a link is checked we record the status code and content type returned by th
 <li>"503" means that a website couldn’t be reached. This could happen because the server was too busy, under maintenance, or something else. Amazon's robot blocker returns 503 codes, so these must be checked manually.
 <li>"504" indicates that the server, while acting as a gateway or proxy did not get a response in time from an upstream server. 
 <li>"511" indicates a problem with the security of the connection - most often an incomplete certificate.
-<li>"None" or "0" means something has gone terribly wrong.
+<li>"None" or "0" means something has gone terribly wrong. Possibly a bug in the checker or a malformed url.
 </ul>
 
 <p> {{ num_checked }} links have been checked. <p>
