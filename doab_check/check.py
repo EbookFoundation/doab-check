@@ -35,6 +35,7 @@ class ContentTyper(object):
         except requests.exceptions.SSLError:
             r =  requests.get(url, verify=False)
             r.status_code = 511
+            return r
         except:
             # unexplained error
             return None
@@ -120,5 +121,6 @@ def check_link(link):
     check.save()
     check.link.recent_check = check
     check.link.save()
+    return check
     
     
