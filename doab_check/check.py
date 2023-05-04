@@ -36,8 +36,17 @@ class ContentTyper(object):
             r =  requests.get(url, verify=False)
             r.status_code = 511
             return r
-        except:
+        except requests.exceptions.ConnectionError:
+            try:
+                r = requests.get(url, allow_redirects=False, headers=HEADERS)
+                return r
+            except Exception as e:
+                # unexplained error
+                logger.exception(e)
+                return None
+        except Exception as e:
             # unexplained error
+            logger.exception(e)
             return None
 
     def calc_type(self, url):

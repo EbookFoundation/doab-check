@@ -36,9 +36,11 @@ View <a href="{% url 'publishers' %}">the list of publishers whose links we've c
 When a link is checked we record the status code and content type returned by the web server. 
 </p>
 <ul>
+<li>"301" or "302" indicates a bad redirect. 
 <li>"403" indicates a misconfigured server that is not allowing access to the promised resource. 
 <li>"404" means the link is broken - the resource is not found.
-<li>"500" means something has gone wrong.
+<li>"500" means something has gone wrong at the website server.
+<li>"502" means is a gateway error. Some websites use load balancers or content distribution networks; if these gateways have a problem connecting with the sorce website, they send a 502 response.
 <li>"503" means that a website couldn’t be reached. This could happen because the server was too busy, under maintenance, or something else. Amazon's robot blocker returns 503 codes, so these must be checked manually.
 <li>"504" indicates that the server, while acting as a gateway or proxy did not get a response in time from an upstream server. 
 <li>"511" indicates a problem with the security of the connection - most often an incomplete certificate.
