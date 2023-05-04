@@ -33,17 +33,21 @@ class ContentTyper(object):
                 r =  requests.get(url, headers=HEADERS)
             return r
         except requests.exceptions.SSLError:
-            r =  requests.get(url, verify=False)
+            r = requests.get(url, verify=False)
             r.status_code = 511
             return r
-        except requests.exceptions.ConnectionError:
-            try:
-                r = requests.get(url, allow_redirects=False, headers=HEADERS)
-                return r
-            except Exception as e:
-                # unexplained error
-                logger.exception(e)
-                return None
+        except requests.exceptions.ConnectionError as ce:
+            if '[Errno 8]' in str(ce):
+                try:
+                    r = requests.get(url, allow_redirects=False, headers=HEADERS)
+                    return r
+                except Exception as e:
+                    pass
+            elif '[Errno 60]' in str(ce):
+                return (408, '', '')
+            # unexplained error
+            logger.exception(e)
+            return None
         except Exception as e:
             # unexplained error
             logger.exception(e)
@@ -77,6 +81,8 @@ def response_parts(response):
     ''' return code, content type, content disposition handling any missing data'''
     if response == None:
         return 0, '', ''
+    if isinstance(response, tuple):
+        return response
     try:
         if response.status_code == 404:
             return 404, '', ''
