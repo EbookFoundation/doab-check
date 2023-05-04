@@ -37,7 +37,7 @@ class ContentTyper(object):
             r.status_code = 511
             return r
         except requests.exceptions.ConnectionError as ce:
-            if '[Errno 8]' in str(ce) or [Errno -2] in str(ce):
+            if '[Errno 8]' in str(ce) or '[Errno -2]' in str(ce):
                 try:
                     r = requests.get(url, allow_redirects=False, headers=HEADERS)
                     return r
