@@ -46,7 +46,7 @@ class ContentTyper(object):
             elif '[Errno 60]' in str(ce):
                 return (408, '', '')
             # unexplained error
-            logger.exception(e)
+            logger.exception(ce)
             return None
         except Exception as e:
             # unexplained error
