@@ -85,16 +85,14 @@ class ProblemPublishersView(generic.TemplateView):
     template_name = 'probpubs.html'
 
     def get_context_data(self, **kwargs):
-        onepub = Link.objects.filter(items=OuterRef("pk"))[:1].values('items__publisher_name')
+        probpubs = {}
         problinks = Link.objects.exclude(
             recent_check__isnull=True).exclude(
             recent_check__return_code__exact=200)
-        probpubs = problinks.annotate(pub=onepub).order_by('pub')
-        pubs = probpubs.values('pub').distinct()
-        numlinks = probpubs.count()
-        for publisher in pubs:
-            publisher['bad_links'] = probpubs.filter(pub=publisher['pub'])
-        return {'pubs': pubs}
+        for link in problinks:
+            pub = link.items.filter(status=1).first().publisher_name
+            probpubs[pub] = probpubs.get(pub, 0) + 1
+        return {'pubs': probpubs.items() }
 
 
 class PublisherView(generic.TemplateView):
