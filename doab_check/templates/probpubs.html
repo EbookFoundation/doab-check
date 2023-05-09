@@ -15,7 +15,7 @@ DOAB Link Checking Problems by Publisher
 </tr>
 {% for pub, numbad in pubs %}
 <tr style="color:red">
-<td> <a href="{% url 'publisher' pub %}">{{ pub | default:'*** no publisher name ***' }}</a> </td>
+<td> <a href="{% url 'publisher' pub | default:'*** no publisher name ***' %}">{{ pub | default:'*** no publisher name ***' }}</a> </td>
 <td> {{ numbad }} </td>
 </tr>
 {% endfor %}
