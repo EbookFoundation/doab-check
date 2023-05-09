@@ -92,7 +92,7 @@ class ProblemPublishersView(generic.TemplateView):
         for link in problinks:
             pub = link.items.filter(status=1).first().publisher_name
             probpubs[pub] = probpubs.get(pub, 0) + 1
-        return {'pubs': probpubs.items() }
+        return {'pubs': sorted(probpubs.items(), key=lambda x: x[0]) }
 
 
 class PublisherView(generic.TemplateView):
