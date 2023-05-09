@@ -13,10 +13,10 @@ DOAB Link Checking Problems by Publisher
 <th>Publisher</th>
 <th>Number</th>
 </tr>
-{% for pub, numbad in pubs %}
+{% for pub in pubs %}
 <tr style="color:red">
-<td> <a href="{% url 'publisher' pub | default: '*** no publisher name ***' %}">{{ pub | default: '*** no publisher name ***' }}</a> </td>
-<td> {{ numbad }} </td>
+<td> <a href="{% url 'publisher' pub.0 %}">{{ pub.0 }}</a> </td>
+<td> {{ pub.1 }} </td>
 </tr>
 {% endfor %}
 </table>

@@ -9,7 +9,7 @@ from django.views import generic
 
 from .models import Item, Link
 
-
+NOPUBNAME = '*** no publisher name ***'
 class HomepageView(generic.TemplateView):
     template_name = 'index.html'
 
@@ -92,7 +92,11 @@ class ProblemPublishersView(generic.TemplateView):
         for link in problinks:
             pub = link.items.filter(status=1).first().publisher_name
             probpubs[pub] = probpubs.get(pub, 0) + 1
-        return {'pubs': sorted(probpubs.items(), key=lambda x: x[0]) }
+        pubs = sorted(probpubs.items(), key=lambda x: x[0])
+        def fixempty(publist):
+            for k, v in publist:
+                yield (NOPUBNAME if not k else k), v
+        return {'pubs':  fixempty(pubs)}
 
 
 class PublisherView(generic.TemplateView):
@@ -101,7 +105,7 @@ class PublisherView(generic.TemplateView):
     def get_context_data(self, **kwargs):
         pub = kwargs['publisher']
         publisher = {'publisher': pub}
-        if pub == '*** no publisher name ***':
+        if pub == NOPUBNAME:
             pub = ''
         publisher_items = Item.objects.filter(
             publisher_name=pub, status=1,
