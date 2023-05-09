@@ -21,7 +21,7 @@ We've grouped the links by the publisher's name and by the server url to make it
 We have a few ways to view the results.
 <ul>
 <li>
-View the links which appear to have <a href="#codes">problems</a>.
+View the links which appear to have problems <a href="{% url 'probpubs' %}">by publisher name</a>, or below, by the return code.
 </li>
 <li>
 View <a href="{% url 'providers' %}">the list of servers we've checked</a>.
@@ -41,7 +41,7 @@ When a link is checked we record the status code and content type returned by th
 <li>"404" means the link is broken - the resource is not found.
 <li>"408" means the website didn't respond in a reasonable time.
 <li>"500" means something has gone wrong at the website server.
-<li>"502" means is a gateway error. Some websites use load balancers or content distribution networks; if these gateways have a problem connecting with the sorce website, they send a 502 response.
+<li>"502" means is a gateway error. Some websites use load balancers or content distribution networks; if these gateways have a problem connecting with the source website, they send a 502 response.
 <li>"503" means that a website couldn’t be reached. This could happen because the server was too busy, under maintenance, or something else. Amazon's robot blocker returns 503 codes, so these must be checked manually.
 <li>"504" indicates that the server, while acting as a gateway or proxy did not get a response in time from an upstream server. 
 <li>"511" indicates a problem with the security of the connection - most often an incomplete certificate.

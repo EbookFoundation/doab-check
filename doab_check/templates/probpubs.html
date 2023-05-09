@@ -1,0 +1,53 @@
+<html>
+<head>
+<title>DOAB Link Checking Problems by Publisher</title>
+</head>
+<body>
+<h2>
+DOAB Link Checking Problems by Publisher
+</h2>
+
+<h3>Problem Link Summary</h3>
+<table>
+<tr>
+<th>Publisher</th>
+<th>Number</th>
+</tr>
+{% for pub in pubs %}
+<tr style="color:red">
+<td> <a href="#{{ pub.pub | default:'*** no publisher name ***'| urlencode}}">{{ pub.pub | default:'*** no publisher name ***' }}</a> </td>
+<td> {{ pub.bad_links.count }} </td>
+</tr>
+{% endfor %}
+</table>
+
+<h3>Problem links by publisher</h3>
+<ul>
+{% for pub in pubs %}
+<li id={{ pub.pub | default:'*** no publisher name ***' | urlencode }}><h4>{{ pub.pub | default:'*** no publisher name ***'}}</h4>
+{% for link in pub.bad_links.all %}
+    <table>
+    <tr>
+    <th>
+    <a href="{{ link.url }}">{{ link.url }}</a>
+    </th>
+    <tr>
+    <td>
+        <table>
+        {% for check in link.recent_checks %}
+        <tr>
+        <td>{{ check.created }}:</td>
+        <td style="color:red">{{ check.return_code }}</td>
+        <td>{{ check.content_type }}</td>
+        </tr>
+        {% endfor %}
+        </table>
+    </td>
+    </tr>
+    {% endfor %}
+    </table>
+</li>
+{% endfor %}
+</ul>
+</body>
+</html>

@@ -1,7 +1,7 @@
 """doab_check views
 """
 
-from django.db.models import Count
+from django.db.models import Count, OuterRef, Subquery
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -69,6 +69,7 @@ class ProviderView(generic.TemplateView):
         
         return {'provider': provider, 'links': provider_links, 'codes': codes}
 
+
 class PublishersView(generic.TemplateView):
     template_name = 'publishers.html'
 
@@ -78,6 +79,23 @@ class PublishersView(generic.TemplateView):
             publisher['item_count'] = Item.objects.filter(
                 publisher_name=publisher['publisher_name'], status=1).count()
         return {'publisher_list': publishers}
+
+
+class ProblemPublishersView(generic.TemplateView):
+    template_name = 'probpubs.html'
+
+    def get_context_data(self, **kwargs):
+        onepub = Link.objects.filter(items=OuterRef("pk"))[:1].values('items__publisher_name')
+        problinks = Link.objects.exclude(
+            recent_check__isnull=True).exclude(
+            recent_check__return_code__exact=200)
+        probpubs = problinks.annotate(pub=onepub).order_by('pub')
+        pubs = probpubs.values('pub').distinct()
+        numlinks = probpubs.count()
+        for publisher in pubs:
+            publisher['bad_links'] = probpubs.filter(pub=publisher['pub'])
+        return {'pubs': pubs}
+
 
 class PublisherView(generic.TemplateView):
     template_name = 'publisher.html'

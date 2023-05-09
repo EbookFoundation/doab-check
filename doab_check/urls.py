@@ -9,6 +9,7 @@ from . import views
 urlpatterns = [
     path('', views.HomepageView.as_view(), name='home'),
     path('admin/', admin.site.urls),
+    path('problems/publishers/', views.ProblemPublishersView.as_view(), name='probpubs'),
     path('problems/<str:code>/', views.ProblemsView.as_view(), name='problems'),
     path('providers/', views.ProvidersView.as_view(), name='providers'),
     path('providers/<str:provider>/', views.ProviderView.as_view(), name='provider'),

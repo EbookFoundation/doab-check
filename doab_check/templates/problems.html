@@ -20,7 +20,7 @@ DOAB links with Status code: {{ code | default:'0 or None' }}
 <ul>
 {% for link in provider.links %}
 <li>
-<p><a href="{{link.url}}">{{link.url}}</a>  ({{link.items.first.publisher_name}})
+<p><a href="{{link.url}}">{{link.url}}</a>  ({{link.items.first.publisher_name | default:'*** no publisher name ***'}})
 <table>
 {% for check  in link.recent_checks %}
 <tr>
