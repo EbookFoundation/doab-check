@@ -90,8 +90,10 @@ class ProblemPublishersView(generic.TemplateView):
             recent_check__isnull=True).exclude(
             recent_check__return_code__exact=200)
         for link in problinks:
-            pub = link.items.filter(status=1).first().publisher_name
-            probpubs[pub] = probpubs.get(pub, 0) + 1
+            first_item = link.items.filter(status=1).first()
+            if first_item:
+                pub = first_item.publisher_name
+                probpubs[pub] = probpubs.get(pub, 0) + 1
         pubs = sorted(probpubs.items(), key=lambda x: x[0])
         def fixempty(publist):
             for k, v in publist:
