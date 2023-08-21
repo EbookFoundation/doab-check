@@ -25,6 +25,10 @@ class PageTests(TestCase):
         self.assertEqual(r.status_code, 200)
         r = self.client.get("/problems/publishers/")
         self.assertEqual(r.status_code, 200)
+        r = self.client.get("/link/10")
+        self.assertEqual(r.status_code, 200)
+        r = self.client.get("/fixing/")
+        self.assertEqual(r.status_code, 200)
 
 
 sample_doab = 'oai:doab-books:20.500.12854/25850'

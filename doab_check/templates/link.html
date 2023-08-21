@@ -1,0 +1,40 @@
+<html>
+<head>
+<title>DOAB Link Details</title>
+{% include "basestyle.html" %}
+</head>
+<body>
+{% include "header.html" %}
+<main class="section oapen-topic oapen-main">
+		<div class="container">
+		<div class="content">
+<h2>
+Link Checking Details 
+
+</h2>
+<ul>
+<li> URL: <a href="{{ link.url }}">{{ link.url }}</a>
+{% for item in link.items.all %}
+<li>Title: {{ item.title }}
+<li>Publisher: {{ item.publisher_name }}
+{% endfor %}
+<li>Provider: <a href="{% url 'provider' link.provider %}">{{ link.provider }}</a>
+{% if not link.live %}
+<li>THIS LINK HAS BEEN REMOVED FROM DOAB
+{% endif %}
+</ul>
+<h3>Link Checking History</h3>
+<table>
+{% for check  in link.recent_checks %}
+<tr>
+<td>{{ check.created }}</td>
+<td {% if check.return_code != 200 %} style="color:red"{% endif %}>{{ check.return_code }}</td>
+<td>{{check.content_type}}</td>
+</tr>
+{% endfor %}
+
+</div>
+</div>
+</main>
+</body>
+</html>

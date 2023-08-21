@@ -1,0 +1,72 @@
+{% load static %}
+<html>
+<head>
+<title>Fixing DOAB Links</title>
+{% include "basestyle.html" %}
+</head>
+<body>
+{% include "header.html" %}
+<main class="section oapen-topic oapen-main">
+		<div class="container">
+		<div class="content">
+<h1>
+Fixing DOAB Links
+</h1>
+<p>
+Keeping the links in DOAB working is a collaborative enterprise of the community. This site checks the links, but without participation from participating publishers, addressing the problems it exposes would be impossible.
+
+</p>
+
+<h3>Types of problems, and how to fix them</h3>
+<p>
+When a link is checked we record the status code and content type returned by the web server. This status code gives us hints about what sort of problem is present 
+</p>
+<dl>
+
+<dt id='code301'>"301" or "302" indicates a bad redirect. 
+<dd> Redirects are used to keep links working after they've changed addresses. CrossRef links, for example, are usually redirected to the publisher's website. But sometimes the redirecting server get it wrong, and there are problems with the resolutions. Another type of problem involves chains of redirects - there might be a loop, or there might be an insecure link in the middle of an other wise secure chain of links - That used to be OK, but now it's an error.
+
+<dt id='code403'>"403" indicates a misconfigured server that is not allowing access to the promised resource. 
+<dd> Sometimes this happens when a website is trying to authenticate users, even thought the resource is open access. Check to make sure your server is not trying to authenticate users for open access resources Or perhaps a link for a closed resource has been mistakenly loaded to DOAB.
+
+<dt id='code404'>"404" means the link is broken - the resource is not found.
+<dd> The common causes for this error are:
+    <ul>
+    <li> The url loaded to DOAB is incorrect. Maybe there's a typo, or perhaps an encoding error (URLs can contain accented characters, whitespace, or symbols, so they need to be escaped or encoded).
+    <li> A resource that used to be available has disappeared or has changed addresses. 
+    </ul>
+    In any case, the correct URL should be loaded to DOAB, or in the worst case, deleted.
+
+<dt id='code408'>"408" means the website didn't respond in a reasonable time.
+<dd> This might be an intermittent problem. Links get checked every month, so look at the the history of checks to see if that's so. Otherwise, you probably have a server problem.
+
+<dt id='code500'>"500" means something has gone wrong at the website server.
+<dd> you have a server problem.
+
+<dt id='code502'>"502" is a gateway error. 
+<dd>Some websites use load balancers or content distribution networks; if these gateways have a problem connecting with the source website, they send a 502 response. The server needs checking.
+
+<dt id='code503'>"503" means that a website couldn’t be reached. 
+<dd>This could happen because the server was too busy, under maintenance, or something else. Amazon's robot blocker returns 503 codes, so these must be checked manually. It may be that your server is blocking users based on the user-agent sent with the request. To make sure that DOAB Check doesn't get blocked, add "doab_check_bot" to your server's allow list.
+
+<dt id='code504'>"504" indicates that the server, while acting as a gateway or proxy did not get a response in time from an upstream server. 
+<dd>Some web server run in protected environments and only talk to the internet via a gateway or a proxy. This means that there is a problem with the communication between the web server and a server in-between.
+
+<dt id='code511'>"511" indicates a problem with the security of the connection - most often an incomplete certificate.
+<dd> The <a href="https://www.ssllabs.com/ssltest/">SSL Server Test</a> can help you diagnose this problem. But beware - current we browsers often ignore some security problems, so the link might work when you try to test it. But because the browser vendors are gradually clamping down on weak security, the next update to Firefox or Chrome might start issuing warnings that you website is unsafe. Better to fix it now.
+
+<dt id='code0'>"None" or "0" means something has gone terribly wrong. Possibly a bug in the checker or a malformed url.
+
+<dd>If your server admins can't find the problem, have them contact us!
+
+<dt id='code200'>"200" means that the link operated correctly.
+<dd> Unfortunately, this DOESN'T necessarily mean that the link is going to the right place. Checking THAT is beyond the scope of this project at present. 
+
+</dl>
+
+
+</div>
+</div>
+</main>
+</body>
+</html>

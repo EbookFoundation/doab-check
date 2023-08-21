@@ -1,7 +1,21 @@
+<!DOCTYPE html>
 <html>
 <head>
-<title>DOAB Hosts</title>
+<title>DOAB Link Checking for {{ publisher }}</title>
+
 {% include "basestyle.html" %}
+<style>
+.itemtitle {
+    padding-top: 1.5ex;
+    font-weight: bold;
+}
+.checked td {
+    padding-right: 2em
+}
+#summary th {
+    padding-right: 2em
+}
+</style>
 </head>
 <body>
 {% include "header.html" %}
@@ -9,24 +23,28 @@
 		<div class="container">
 		<div class="content">
 <h2>
-Link Checking for 
-{{provider.provider}} ({{provider.link_count}} links) 
+DOAB Linkchecking for 
+{{ publisher }} ({{ count|default:0 }} links)
 </h2>
-<h3>Summary</h3>
-<table>
+
+<h3>Link checking summary</h3>
+<table id="summary">
 <tr>
-<th>HTTP Code</th>
-<th>number</th>
+<th>HTTP Status Code</th>
+<th>number of links</th>
 <th></th>
 </tr>
-{% for code in codes %}
-<tr {% if code.recent_check__return_code != 200 %} style="color:red"{% endif %}>
-<td> {{ code.recent_check__return_code }} </td>
-<td> <a href="#code{{ code.recent_check__return_code }}">{{ code.count }}</a>
-<td><a href="{% url 'fixing' %}#{{ code.recent_check__return_code }}">how to fix</a></td>
+{% for codeobj in codes %}
+{% with code=codeobj.recent_check__return_code %}
+<tr {% if code != 200 %} style="color:red"{% endif %}>
+<td> {{ code }} </td>
+<td> <a href="#code{{ code }}">{% if codeobj.count < 998 %}{{ codeobj.count }}
+    {% else %} more than 1000 {% endif %}</a> </td>
+<td> <a href='{{ code }}'>?</a> </td>
 </tr>
+{% endwith %}
 {% empty %}
-<tr><td colspan=2>None of the active links for {{ provider.provider }} have been checked.</td>
+<tr><td colspan=2>None of the active links for {{ publisher.publisher }} have been checked.</td>
 {% endfor %}
 </table>
 
@@ -49,14 +67,15 @@ Link Checking for
     <td>{{ link.recent_check.content_type }}</td>
     </tr>
     </table>
+
 {% if forloop.counter == 1000 %} Can't display more than 1000 links {% endif %}
 {% endwith %}
 {% endfor %}
 
 {% endwith %}
 {% endfor %}
+</ul>
 </div>
 </div>
-</main>
 </body>
 </html>

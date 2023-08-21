@@ -1,11 +1,17 @@
 <html>
 <head>
 <title>DOAB Problem Links</title>
+{% include "basestyle.html" %}
 </head>
 <body>
+{% include "header.html" %}
+<main class="section oapen-topic oapen-main">
+		<div class="container">
+		<div class="content">
 <h2>
-DOAB links with Status code: {{ code | default:'0 or None' }}
+DOAB links with status code: {{ code | default:'0 or None' }}
 </h2>
+<p> Here's  <a href="{% url 'fixing' %}#code{{ code | default:'0' }}">more information about status code {{ code | default:'0 or None' }}</a>
 <ul>
 {% for provider in providers %}
 <li> <a href="#{{ provider.provider | urlencode }}">{{ provider.provider }}</a>:
@@ -19,21 +25,27 @@ DOAB links with Status code: {{ code | default:'0 or None' }}
 <dd>
 <ul>
 {% for link in provider.links %}
-<li>
-<p><a href="{{link.url}}">{{link.url}}</a>  ({{link.items.first.publisher_name | default:'*** no publisher name ***'}})
-<table>
-{% for check  in link.recent_checks %}
-<tr>
-<td>{{ check.created }}</td>
-<td {% if check.return_code != 200 %} style="color:red"{% endif %}>{{ check.return_code }}</td>
-<td>{{check.content_type}}</td>
-{% endfor %}
-</table>
-</li>
+{% with title=link.items.all.0.title %}
+    {% ifchanged title %}<div class='itemtitle'>{{ title }}</div>{% endifchanged %}
+    
+    <div class='itemlink'><a href="{{ link.url }}">{{ link.url }}</a></div>  
+    <a href="{% url 'link' link.id %}">[full info]</a>
+
+    <table class="checked">
+    <tr>
+    <td>Last checked: {{ link.recent_check.created }}</td>
+    <td {%if code != 200 %} style="color:red"{% endif %}>{{ code }}</td>
+    <td>{{ link.recent_check.content_type }}</td>
+    </tr>
+    </table>
+{% if forloop.counter == 1000 %} Can't display more than 1000 links {% endif %}
+{% endwith %}
 {% endfor %}
 </ul>
 </dd>
 {% endfor %}
 </dl>
-</body>
+</div>
+</div>
+</main></body>
 </html>

@@ -63,11 +63,24 @@ class ProviderView(generic.TemplateView):
         codes = provider_links.order_by('-recent_check__return_code').values(
             'recent_check__return_code').distinct()
         for code in codes:
-            code['count'] = provider_links.filter(
+            code['links'] = provider_links.filter(live=True,
                 recent_check__return_code=code['recent_check__return_code'],
-            ).distinct().count()
+            ).order_by('items__title')
+            code['count'] = code['links'].count()
+            code['links'] = code['links'][:1000]
         
-        return {'provider': provider, 'links': provider_links, 'codes': codes}
+        return {'provider': provider, 
+                'links': provider_links.order_by('-recent_check__return_code'),
+                'codes': codes}
+
+class LinkView(generic.TemplateView):
+    template_name = 'link.html'
+
+    def get_context_data(self, **kwargs):
+        link_id = int(kwargs['link_id'])
+        link = get_object_or_404(Link, id=link_id)
+        
+        return {'link': link}
 
 
 class PublishersView(generic.TemplateView):
@@ -100,28 +113,27 @@ class ProblemPublishersView(generic.TemplateView):
                 yield (NOPUBNAME if not k else k), v
         return {'pubs':  fixempty(pubs)}
 
-
+        
 class PublisherView(generic.TemplateView):
-    template_name = 'publisher.html'
+    template_name = 'publisherlinks.html'
 
     def get_context_data(self, **kwargs):
         pub = kwargs['publisher']
         publisher = {'publisher': pub}
         if pub == NOPUBNAME:
             pub = ''
-        publisher_items = Item.objects.filter(
-            publisher_name=pub, status=1,
+        publisher_links = Link.objects.filter(
+            items__publisher_name=pub, items__status=1, recent_check__isnull=False
         )
-        publisher['item_count'] = publisher_items.count()
-        publisher_items = publisher_items.filter(links__recent_check__isnull=False).distinct()
-        
-        codes = publisher_items.order_by('-links__recent_check__return_code').values(
-            'links__recent_check__return_code').distinct()
+        link_count = publisher_links.distinct().count()
+
+        codes = publisher_links.order_by('-recent_check__return_code').values(
+            'recent_check__return_code').distinct()
         for code in codes:
-            code['count'] = Link.objects.filter(live=True,
-                recent_check__return_code=code['links__recent_check__return_code'],
-                items__publisher_name=pub).distinct().count()
+            code['links'] = publisher_links.filter(live=True,
+                recent_check__return_code=code['recent_check__return_code'],
+            ).order_by('items__title')
+            code['count'] = code['links'].count()
         
-        
-        
-        return {'publisher': publisher, 'items': publisher_items, 'codes': codes}
+        return {'codes': codes, 'publisher': pub, 'count': link_count}
+

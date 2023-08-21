@@ -2,12 +2,17 @@
 <html>
 <head>
 <title>DOAB Check</title>
+{% include "basestyle.html" %}
 </head>
 <body>
+{% include "header.html" %}
+<main class="section oapen-topic oapen-main">
+		<div class="container">
+		<div class="content">
 <h1>
 Welcome to DOAB Check!
 </h1>
-<p>
+<p style='box-sizing: content-box'>
 <img style='height:5em; padding:1em; margin-bottom: 1em' src='{% static "fef_logo_large.png" %}' alt='FEF logo'>
 <img style='height:5em;  padding:1em; margin-bottom: 1em' src='{% static "doab.png" %}' alt='DOAB logo'>
 </p
@@ -36,16 +41,16 @@ View <a href="{% url 'publishers' %}">the list of publishers whose links we've c
 When a link is checked we record the status code and content type returned by the web server. 
 </p>
 <ul>
-<li>"301" or "302" indicates a bad redirect. 
-<li>"403" indicates a misconfigured server that is not allowing access to the promised resource. 
-<li>"404" means the link is broken - the resource is not found.
-<li>"408" means the website didn't respond in a reasonable time.
-<li>"500" means something has gone wrong at the website server.
-<li>"502" means is a gateway error. Some websites use load balancers or content distribution networks; if these gateways have a problem connecting with the source website, they send a 502 response.
-<li>"503" means that a website couldn’t be reached. This could happen because the server was too busy, under maintenance, or something else. Amazon's robot blocker returns 503 codes, so these must be checked manually.
-<li>"504" indicates that the server, while acting as a gateway or proxy did not get a response in time from an upstream server. 
-<li>"511" indicates a problem with the security of the connection - most often an incomplete certificate.
-<li>"None" or "0" means something has gone terribly wrong. Possibly a bug in the checker or a malformed url.
+<li><a href="{% url 'fixing' %}#code302">"301" or "302"</a> indicates a bad redirect. 
+<li><a href="{% url 'fixing' %}#code403">"403"</a> indicates a misconfigured server that is not allowing access to the promised resource. 
+<li><a href="{% url 'fixing' %}#code404">"404"</a> means the link is broken - the resource is not found.
+<li><a href="{% url 'fixing' %}#code408">"408"</a> means the website didn't respond in a reasonable time.
+<li><a href="{% url 'fixing' %}#code500">"500"</a> means something has gone wrong at the website server.
+<li><a href="{% url 'fixing' %}#code502">"502"</a> means is a gateway error. Some websites use load balancers or content distribution networks; if these gateways have a problem connecting with the source website, they send a 502 response.
+<li><a href="{% url 'fixing' %}#code503">"503"</a> means that a website couldn’t be reached. This could happen because the server was too busy, under maintenance, or something else. Amazon's robot blocker returns 503 codes, so these must be checked manually.
+<li><a href="{% url 'fixing' %}#code504">"504"</a> indicates that the server, while acting as a gateway or proxy did not get a response in time from an upstream server. 
+<li><a href="{% url 'fixing' %}#code511">"511"</a> indicates a problem with the security of the connection - most often an incomplete certificate.
+<li><a href="{% url 'fixing' %}#code0">"None" or "0"</a> means something has gone terribly wrong. Possibly a bug in the checker or a malformed url.
 </ul>
 
 <p> {{ num_checked }} links have been checked. <p>
@@ -64,6 +69,8 @@ When a link is checked we record the status code and content type returned by th
 </tr>
 {% endfor %}
 </table>
-
+</div>
+</div>
+</main>
 </body>
 </html>
