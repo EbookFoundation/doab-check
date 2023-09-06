@@ -34,11 +34,12 @@ class ProblemsView(generic.TemplateView):
         code = kwargs['code']
         
         problems = Link.objects.exclude(recent_check__isnull=True).filter(
-            recent_check__return_code__exact=code).order_by('provider')
-        providers = problems.values('provider').distinct()
+            recent_check__return_code__exact=code).order_by('provider'
+            ).annotate(title=F('items__title'))
+        providers = problems.values('provider').distinct().annotate(Count('provider'))
         for provider in providers:
             provider['links'] = problems.filter(provider=provider['provider'])
-            provider['count'] = provider['links'].count()
+            #provider['count'] = provider['links'].count()
         return {'code': code, 'providers': providers}
 
 
@@ -57,14 +58,16 @@ class ProviderView(generic.TemplateView):
     def get_context_data(self, **kwargs):
         prov = kwargs['provider']
         provider = {'provider': prov}
-        provider_links = Link.objects.filter(provider=prov, live=True, recent_check__isnull=False)
+        provider_links = Link.objects.filter(
+            provider=prov, live=True, recent_check__isnull=False
+        ).annotate(title=F('items__title'))
         provider['link_count'] = provider_links.count()
         codes = provider_links.order_by('-recent_check__return_code').values(
             'recent_check__return_code').distinct().annotate(Count('recent_check__return_code'))
         for code in codes:
             code['links'] = provider_links.filter(live=True,
                 recent_check__return_code=code['recent_check__return_code'],
-            ).order_by('items__title').annotate(title=F('items__title'))
+            ).order_by('items__title')
             code['links'] = code['links'][:1000]
         
         return {'provider': provider, 

@@ -15,7 +15,7 @@ DOAB links with status code: {{ code | default:'0 or None' }}
 <ul>
 {% for provider in providers %}
 <li> <a href="#{{ provider.provider | urlencode }}">{{ provider.provider }}</a>:
-     {{ provider.count }} problem links </li>
+     {{ provider.provider__count }} problem links </li>
 {% endfor %}
 </ul>
 
@@ -25,7 +25,7 @@ DOAB links with status code: {{ code | default:'0 or None' }}
 <dd>
 <ul>
 {% for link in provider.links %}
-{% with title=link.items.all.0.title %}
+{% with title=link.title %}
     {% ifchanged title %}<div class='itemtitle'>{{ title }}</div>{% endifchanged %}
     
     <div class='itemlink'><a href="{{ link.url }}">{{ link.url }}</a></div>  
