@@ -22,7 +22,7 @@ Link Checking for
 {% for code in codes %}
 <tr {% if code.recent_check__return_code != 200 %} style="color:red"{% endif %}>
 <td> {{ code.recent_check__return_code }} </td>
-<td> <a href="#code{{ code.recent_check__return_code }}">{{ code.count }}</a>
+<td> <a href="#code{{ code.recent_check__return_code }}">{{ code.recent_check__return_code__count }}</a>
 <td><a href="{% url 'fixing' %}#{{ code.recent_check__return_code }}">how to fix</a></td>
 </tr>
 {% empty %}
@@ -36,7 +36,7 @@ Link Checking for
 {% with code=codeobj.recent_check__return_code %}
 <h3{% if code != 200 %} style="color:red"{% endif %} id="code{{ code }}"> {{ code }}</h3>
 {% for link in codeobj.links %}
-{% with title=link.items.all.0.title %}
+{% with title=link.title %}
     {% ifchanged title %}<div class='itemtitle'>{{ title }}</div>{% endifchanged %}
     
     <div class='itemlink'><a href="{{ link.url }}">{{ link.url }}</a></div>  

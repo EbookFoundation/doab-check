@@ -11,10 +11,10 @@
 <h2>
 DOAB Link Checking by Server Hostname
 </h2>
-
+<p>(number of links checked in parentheses)
 <ul>
 {% for provider in provider_list %}
-<li><a href="{%  url 'provider' provider.provider %}">{{provider.provider}}</a> ({{provider.link_count}})</li>
+<li><a href="{%  url 'provider' provider.provider %}">{{provider.provider}}</a> ({{provider.provider__count}})</li>
 {% endfor %}
 </ul>
 </div>

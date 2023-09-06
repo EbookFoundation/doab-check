@@ -1,7 +1,7 @@
 """doab_check views
 """
 
-from django.db.models import Count, OuterRef, Subquery
+from django.db.models import Count, F
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -46,9 +46,8 @@ class ProvidersView(generic.TemplateView):
     template_name = 'providers.html'
 
     def get_context_data(self, **kwargs):
-        providers = Link.objects.order_by('provider').values('provider').distinct()
-        for provider in providers:
-            provider['link_count'] = Link.objects.filter(provider=provider['provider']).count()
+        providers = Link.objects.order_by('provider').filter(live=True, recent_check__isnull=False,
+            ).values('provider').distinct().annotate(Count('provider'))
         return {'provider_list': providers}
 
 
@@ -61,12 +60,11 @@ class ProviderView(generic.TemplateView):
         provider_links = Link.objects.filter(provider=prov, live=True, recent_check__isnull=False)
         provider['link_count'] = provider_links.count()
         codes = provider_links.order_by('-recent_check__return_code').values(
-            'recent_check__return_code').distinct()
+            'recent_check__return_code').distinct().annotate(Count('recent_check__return_code'))
         for code in codes:
             code['links'] = provider_links.filter(live=True,
                 recent_check__return_code=code['recent_check__return_code'],
-            ).order_by('items__title')
-            code['count'] = code['links'].count()
+            ).order_by('items__title').annotate(title=F('items__title'))
             code['links'] = code['links'][:1000]
         
         return {'provider': provider, 
