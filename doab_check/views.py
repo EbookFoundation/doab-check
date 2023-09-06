@@ -99,19 +99,11 @@ class ProblemPublishersView(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         probpubs = {}
-        problinks = Link.objects.exclude(
-            recent_check__isnull=True).exclude(
+        problinks = Link.objects.filter(live=True, recent_check__isnull=False).exclude(
             recent_check__return_code__exact=200)
-        for link in problinks:
-            first_item = link.items.filter(status=1).first()
-            if first_item:
-                pub = first_item.publisher_name
-                probpubs[pub] = probpubs.get(pub, 0) + 1
-        pubs = sorted(probpubs.items(), key=lambda x: x[0])
-        def fixempty(publist):
-            for k, v in publist:
-                yield (NOPUBNAME if not k else k), v
-        return {'pubs':  fixempty(pubs)}
+        pubnames = problinks.order_by('items__publisher_name').values(
+            'items__publisher_name').distinct().annotate(Count('items__publisher_name'))
+        return {'pubs':  pubnames}
 
         
 class PublisherView(generic.TemplateView):
