@@ -11,13 +11,12 @@
 <h2>
 DOAB Linkchecking by Publisher
 </h2>
+<p>(number of books in parentheses)
 <ul>
 {% for publisher in publisher_list %}
 <li><a href="{% url 'publisher' publisher.publisher_name|default:'*** no publisher name ***' %}">
-{% if publisher.publisher_name %}{{publisher.publisher_name}}
-{% else %}*** no publisher name ***
-{% endif %}
-</a> ({{publisher.item_count}})</li>
+{{ publisher.publisher_name|default:'*** no publisher name ***' }}
+</a> ({{ publisher.publisher_name__count }})</li>
 {% endfor %}
 </ul>
 </div>

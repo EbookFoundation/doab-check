@@ -87,10 +87,9 @@ class PublishersView(generic.TemplateView):
     template_name = 'publishers.html'
 
     def get_context_data(self, **kwargs):
-        publishers = Item.objects.order_by('publisher_name').values('publisher_name').distinct()
-        for publisher in publishers:
-            publisher['item_count'] = Item.objects.filter(
-                publisher_name=publisher['publisher_name'], status=1).count()
+        items = Item.objects.filter(status=1)
+        publishers = items.order_by('publisher_name').values(
+            'publisher_name').distinct().annotate(Count('publisher_name'))
         return {'publisher_list': publishers}
 
 
@@ -98,7 +97,6 @@ class ProblemPublishersView(generic.TemplateView):
     template_name = 'probpubs.html'
 
     def get_context_data(self, **kwargs):
-        probpubs = {}
         problinks = Link.objects.filter(live=True, recent_check__isnull=False).exclude(
             recent_check__return_code__exact=200)
         pubnames = problinks.order_by('items__publisher_name').values(
