@@ -14,15 +14,15 @@ class HomepageView(generic.TemplateView):
     template_name = 'index.html'
 
     def get_context_data(self, **kwargs):
-        codes = Link.objects.filter(recent_check__isnull=False).order_by(
-            '-recent_check__return_code').values(
+        active_links = Link.objects.filter(recent_check__isnull=False).only(
+            'recent_check').order_by('-recent_check__return_code').distinct()
+        codes = active_links.values(
             'recent_check__return_code').distinct()
-        num_checked = Link.objects.filter(
-                recent_check__return_code__isnull=False).distinct().count()
+        num_checked = active_links.count()
         for code in codes:
-            code['count'] = Link.objects.filter(
+            code['count'] = active_links.filter(
                 recent_check__return_code=code['recent_check__return_code'],
-            ).distinct().count()
+            ).count()
             code['percent'] = '{:.2%}'.format(code['count'] / num_checked)
         return {'num_checked': num_checked, 'codes': codes}
 

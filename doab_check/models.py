@@ -78,7 +78,7 @@ class Check(models.Model):
     ''' The results of a link check '''
     created = models.DateTimeField(auto_now_add=True)
     link = models.ForeignKey("Link", related_name='checks', on_delete=models.CASCADE)
-    return_code = models.IntegerField()
+    return_code = models.IntegerField(db_index=True)
     content_type = models.CharField(max_length=255, null=True)
     location = models.ForeignKey("Link", related_name='redirects_from', null=True,
                                  on_delete=models.SET_NULL)
