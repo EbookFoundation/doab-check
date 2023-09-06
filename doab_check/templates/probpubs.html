@@ -20,7 +20,7 @@ DOAB Link Checking Problems by Publisher
 </tr>
 {% for pub in pubs %}
 <tr style="color:red">
-<td> <a href="{% url 'publisher' pub.items__publisher_name %}">{{ pub.items__publisher_name }}</a> </td>
+<td> <a href="{% url 'publisher' pub.items__publisher_name|default:'*** no publisher name ***'  %}">{{ pub.items__publisher_name|default:'*** no publisher name ***' }}</a> </td>
 <td> {{ pub.items__publisher_name__count }} </td>
 </tr>
 {% endfor %}
