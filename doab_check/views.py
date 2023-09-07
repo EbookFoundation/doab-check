@@ -115,16 +115,15 @@ class PublisherView(generic.TemplateView):
             pub = ''
         publisher_links = Link.objects.filter(
             items__publisher_name=pub, items__status=1, recent_check__isnull=False
-        )
+        ).annotate(title=F('items__title'))
         link_count = publisher_links.distinct().count()
 
         codes = publisher_links.order_by('-recent_check__return_code').values(
-            'recent_check__return_code').distinct()
+            'recent_check__return_code').distinct().annotate(Count('recent_check__return_code'))
         for code in codes:
             code['links'] = publisher_links.filter(live=True,
                 recent_check__return_code=code['recent_check__return_code'],
             ).order_by('items__title')
-            code['count'] = code['links'].count()
         
         return {'codes': codes, 'publisher': pub, 'count': link_count}
 

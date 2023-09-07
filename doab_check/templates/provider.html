@@ -23,7 +23,9 @@ Link Checking for
 <tr {% if code.recent_check__return_code != 200 %} style="color:red"{% endif %}>
 <td> {{ code.recent_check__return_code }} </td>
 <td> <a href="#code{{ code.recent_check__return_code }}">{{ code.recent_check__return_code__count }}</a>
-<td><a href="{% url 'fixing' %}#{{ code.recent_check__return_code }}">how to fix</a></td>
+<td>{% if code.recent_check__return_code != 200 %}
+<a href="{% url 'fixing' %}#code{{ code.recent_check__return_code }}">how to fix</a>
+{% endif %}</td>
 </tr>
 {% empty %}
 <tr><td colspan=2>None of the active links for {{ provider.provider }} have been checked.</td>

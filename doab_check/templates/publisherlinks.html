@@ -5,10 +5,6 @@
 
 {% include "basestyle.html" %}
 <style>
-.itemtitle {
-    padding-top: 1.5ex;
-    font-weight: bold;
-}
 .checked td {
     padding-right: 2em
 }
@@ -35,12 +31,14 @@ DOAB Linkchecking for
 <th></th>
 </tr>
 {% for codeobj in codes %}
-{% with code=codeobj.recent_check__return_code %}
+{% with code=codeobj.recent_check__return_code codecount=codeobj.recent_check__return_code__count %}
 <tr {% if code != 200 %} style="color:red"{% endif %}>
 <td> {{ code }} </td>
-<td> <a href="#code{{ code }}">{% if codeobj.count < 998 %}{{ codeobj.count }}
+<td> <a href="#code{{ code }}">{% if codecount < 998 %}{{ codecount }}
     {% else %} more than 1000 {% endif %}</a> </td>
-<td> <a href='{{ code }}'>?</a> </td>
+<td>{% if code != 200 %}
+ <a href="{% url 'fixing' %}#code{{ code }}">how to fix</a>
+ {% endif %}</td>
 </tr>
 {% endwith %}
 {% empty %}
@@ -54,7 +52,7 @@ DOAB Linkchecking for
 {% with code=codeobj.recent_check__return_code %}
 <h3{% if code != 200 %} style="color:red"{% endif %} id="code{{ code }}"> {{ code }}</h3>
 {% for link in codeobj.links %}
-{% with title=link.items.all.0.title %}
+{% with title=link.title %}
     {% ifchanged title %}<div class='itemtitle'>{{ title }}</div>{% endifchanged %}
     
     <div class='itemlink'><a href="{{ link.url }}">{{ link.url }}</a></div>  
