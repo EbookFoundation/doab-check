@@ -15,16 +15,22 @@ class HomepageView(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         active_links = Link.objects.filter(recent_check__isnull=False).only(
-            'recent_check').order_by('-recent_check__return_code').distinct()
+            'recent_check').order_by('-recent_check__return_code')
         codes = active_links.values(
             'recent_check__return_code').distinct()
         num_checked = active_links.count()
+        items = Item.objects.filter(status=1)
+        num_items = items.count()
+        num_bad_items = active_links.exclude(recent_check__return_code=200).values('items'
+            ).distinct().count()
+
         for code in codes:
             code['count'] = active_links.filter(
                 recent_check__return_code=code['recent_check__return_code'],
             ).count()
             code['percent'] = '{:.2%}'.format(code['count'] / num_checked)
-        return {'num_checked': num_checked, 'codes': codes}
+        return {'num_checked': num_checked, 'codes': codes,
+                'num_items': num_items, 'num_bad_items': num_bad_items}
 
 
 class ProblemsView(generic.TemplateView):
