@@ -157,3 +157,4 @@ cython_debug/
 
 *.zip
 *.csv
+logs/
