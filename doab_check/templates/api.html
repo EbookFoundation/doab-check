@@ -1,0 +1,58 @@
+{% load static %}
+<html>
+<head>
+<title>Fixing DOAB Links</title>
+{% include "basestyle.html" %}
+</head>
+<body>
+{% include "header.html" %}
+<main class="section oapen-topic oapen-main">
+		<div class="container">
+		<div class="content">
+<h1>
+DOAB-Check Data
+</h1>
+<p>
+Link checking data is available from an api, on a per-link basis, and in bulk via download.
+</p>
+<h2>
+API
+</h2>
+The api is pretty self-explanatory. requests are of the form:
+<pre>
+https://doab-check.ebookfoundation.org/api/doab/[the doab id]
+</pre>
+DOAB ids look like this:
+<pre>
+oai:doab-books:20.500.12854/NNNNN
+</pre>
+(you can omit the 'oai:doab-books:'). 
+The response (JSON) looks like this:
+<pre>
+{
+    "doab": "oai:doab-books:20.500.12854/35337",
+    "status": "found",
+    "links": [
+        {"url": "http://library.oapen.org/handle/20.500.12657/32815",
+         "checked": "2023-10-01T04:05:08.816Z",
+         "return_code": 200,
+         "content_type": "html"},
+        {"url": "https://library.oapen.org/bitstream/20.500.12657/37516/1/604614.pdf",
+         "checked": "2023-10-01T04:05:09.900Z",
+         "return_code": 200,
+         "content_type": "pdf"},
+    ]
+}
+</pre>
+<h2>
+Bulk download
+</h2>
+<p>
+A zipped CSV file of all the active urls and the results of our most recent check is available at:<br>
+<a href="/static/doab_checks.csv.zip">https://doab-check.ebookfoundation.org/static/doab_checks.csv.zip</a>. <br>This file is updated roughly once a day.
+</p>
+</div>
+</div>
+</main>
+</body>
+</html>

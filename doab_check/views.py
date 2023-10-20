@@ -2,10 +2,11 @@
 """
 
 from django.db.models import Count, F
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse, Http404
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views import generic
+from django.views.decorators.csrf import csrf_exempt
 
 from .models import Item, Link
 
@@ -133,3 +134,34 @@ class PublisherView(generic.TemplateView):
         
         return {'codes': codes, 'publisher': pub, 'count': link_count}
 
+@csrf_exempt
+def link_api_view(request, doab):
+    data = {'doab': doab}
+    if not doab.startswith('oai:doab-books:'):
+        if doab.startswith('20.500.12854'):
+            doab =  'oai:doab-books:' + doab
+            data['doab'] = doab
+        else:
+            data['status'] = 'invalid'
+            return JsonResponse(data)
+    item = Item.objects.get(doab=doab)
+    if not item:
+        data['status'] = 'not found'
+        return JsonResponse(data)        
+    data['status'] = 'found'
+    links = []
+    data['links'] = links
+    for link in item.links.filter(live=True):
+        link_dict = {'url': link.url}
+        if link.recent_check:
+            link_dict['checked'] = link.recent_check.created
+            link_dict['return_code'] = link.recent_check.return_code
+            link_dict['content_type'] = link.recent_check.content_type
+        links.append(link_dict)
+    return JsonResponse(data)
+                     
+            
+    
+        
+    
+    
