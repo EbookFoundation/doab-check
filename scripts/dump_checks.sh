@@ -3,5 +3,5 @@
 
 cd /home/ubuntu/doab-check
 /home/ubuntu/.local/bin/pipenv run python manage.py dump_checks >> dump_checks.log
-gzip dump_checks.csv
-mv dump_checks.zip static/dump_checks.csv.zip
+gzip doab_checks.csv
+mv doab_checks.csv.gz static/doab_checks.csv.gz
