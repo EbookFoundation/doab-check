@@ -101,6 +101,9 @@ def load_doab_record(doab_id, title, publisher_name, item_type, urls, timestamps
             linkrel.status = 1
         else:
             linkrel.status = 0
+        linkrel.save()
+        linkrel.link.save()
+            
     return new_item
         
 
@@ -115,6 +118,7 @@ def set_deleted(record):
             for linkrel in item.related.all():
                 linkrel.status = 0
                 linkrel.save()
+                linkrel.link.save()
             return item
         except Item.DoesNotExist:
             logger.warning(f'no item {doab}')

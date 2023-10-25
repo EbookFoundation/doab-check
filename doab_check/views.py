@@ -15,8 +15,8 @@ class HomepageView(generic.TemplateView):
     template_name = 'index.html'
 
     def get_context_data(self, **kwargs):
-        active_links = Link.objects.filter(recent_check__isnull=False).only(
-            'recent_check').order_by('-recent_check__return_code')
+        active_links = Link.objects.filter(recent_check__isnull=False, live=True
+            ).only('recent_check').order_by('-recent_check__return_code')
         codes = active_links.values(
             'recent_check__return_code').distinct()
         num_checked = active_links.count()
@@ -40,9 +40,9 @@ class ProblemsView(generic.TemplateView):
     def get_context_data(self, **kwargs):
         code = kwargs['code']
         
-        problems = Link.objects.exclude(recent_check__isnull=True).filter(
-            recent_check__return_code__exact=code).order_by('provider'
-            ).annotate(title=F('items__title'))
+        problems = Link.objects.exclude(recent_check__isnull=True
+            ).filter(recent_check__return_code__exact=code, live=True
+            ).order_by('provider').annotate(title=F('items__title'))
         providers = problems.values('provider').distinct().annotate(Count('provider'))
         for provider in providers:
             provider['links'] = problems.filter(provider=provider['provider'])
@@ -67,7 +67,7 @@ class ProviderView(generic.TemplateView):
         provider = {'provider': prov}
         provider_links = Link.objects.filter(
             provider=prov, live=True, recent_check__isnull=False
-        ).annotate(title=F('items__title'))
+            ).annotate(title=F('items__title'))
         provider['link_count'] = provider_links.count()
         codes = provider_links.order_by('-recent_check__return_code').values(
             'recent_check__return_code').distinct().annotate(Count('recent_check__return_code'))
@@ -121,7 +121,7 @@ class PublisherView(generic.TemplateView):
         if pub == NOPUBNAME:
             pub = ''
         publisher_links = Link.objects.filter(
-            items__publisher_name=pub, items__status=1, recent_check__isnull=False
+            items__publisher_name=pub, live=True, recent_check__isnull=False
         ).annotate(title=F('items__title'))
         link_count = publisher_links.distinct().count()
 
@@ -151,12 +151,12 @@ def link_api_view(request, doab):
     data['status'] = 'found'
     links = []
     data['links'] = links
-    for link in item.links.filter(live=True):
-        link_dict = {'url': link.url}
-        if link.recent_check:
-            link_dict['checked'] = link.recent_check.created
-            link_dict['return_code'] = link.recent_check.return_code
-            link_dict['content_type'] = link.recent_check.content_type
+    for linkrel in item.related.filter(status=1):
+        link_dict = {'url': linkrel.link.url}
+        if linkrel.link.recent_check:
+            link_dict['checked'] = linkrel.link.recent_check.created
+            link_dict['return_code'] = linkrel.link.recent_check.return_code
+            link_dict['content_type'] = linkrel.link.recent_check.content_type
         links.append(link_dict)
     return JsonResponse(data)
                      

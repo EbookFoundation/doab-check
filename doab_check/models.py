@@ -52,6 +52,12 @@ class Link(models.Model):
             if netloc.startswith('www.'):
                 netloc = netloc[4:]
             self.provider = netloc
+        if self.id:
+            live = False
+            for linkrel in self.related.filter(status=1):
+                live = True
+                break
+            self.live = live
         super().save(*args, **kwargs)
 
 

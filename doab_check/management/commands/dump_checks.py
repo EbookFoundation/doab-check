@@ -18,7 +18,7 @@ class Command(BaseCommand):
 
     def check_data(self, item):
         link_dict = {'doab': item.doab}
-        for link in item.links.filter(live=True):
+        for link in item.links.filter(related__status=1):
             link_dict['url'] = link.url
             if link.recent_check:
                 link_dict['checked'] = link.recent_check.created
@@ -44,5 +44,5 @@ class Command(BaseCommand):
 
         end_time = datetime.datetime.now()
         logger.info(f'wrote {num} link checks in {end_time - start_time}')
-        self.stdout.write(f'wrote {num} link checks in {end_time - start_time}')
+        self.stdout.write(f'wrote link checks for {num} items in {end_time - start_time}')
 
