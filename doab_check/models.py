@@ -2,7 +2,7 @@
 from urllib.parse import urlparse
 
 from django.db import models
-
+from django.urls import reverse
 
 class Item(models.Model):
     ''' an object in DOAB'''
@@ -59,6 +59,9 @@ class Link(models.Model):
                 break
             self.live = live
         super().save(*args, **kwargs)
+    
+    def get_absolute_url(self):
+        return reverse("link", args=[self.id])
 
 
 class Timestamp(models.Model):

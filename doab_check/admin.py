@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 # Register your models here.
@@ -21,23 +22,30 @@ class CheckAdmin(admin.ModelAdmin):
 class ItemAdmin(admin.ModelAdmin):
     list_display = (str, 'title', 'resource_type', 'status')
     date_hierarchy = 'created'
-    search_fields = ['title']
+    search_fields = ['title', 'publisher_name']
 
 
 @admin.register(models.Link)
 class LinkAdmin(admin.ModelAdmin):
-    list_display = ('url', 'provider')
+    list_display = ('url', 'provider', 'check_status')
+    list_filter = ['recent_check__return_code']
     date_hierarchy = 'created'
     search_fields = ['url']
-    exclude = ['url']
-    readonly_fields = ('link_display', 'provider')
+    exclude = ['url', 'recent_check']
+    readonly_fields = ['link_display', 'provider', 'live', 'check_status']
     actions = ['recheck']
     
+    @admin.display(description="status")
+    def check_status(self, obj):
+        if obj.recent_check:
+            return str(obj.recent_check.return_code)
+        
     @admin.action(description="Recheck the links")
     def recheck(self, request, queryset):
         for link in queryset:
             check_link(link)
-
+    
+    @admin.display(description="URL")
     def link_display(self, obj):
         return mark_safe(f'<a href="{obj.url}">{obj.url}</a>')
     
