@@ -3,6 +3,7 @@
 
 import logging
 import re
+import threading
 import time
 from urllib.parse import urlparse
 
@@ -128,7 +129,7 @@ def type_for_url(url, response=None):
     return code, f'other; {ct}'
 
 def check_link(link):
-    ''' given a Link object, check it's URL, put the result in a Check object '''
+    ''' given a Link object, check its URL, put the result in a Check object '''
     check = Check(link=link)
     code, ct =  type_for_url(link.url)
     check.return_code = code
@@ -137,5 +138,13 @@ def check_link(link):
     check.link.recent_check = check
     check.link.save()
     return check
-    
+
+def check_links(queryset):
+    for link in queryset:
+        check = check_link(link)
+
+def start_check_links(queryset):
+    checker = threading.Thread(target=check_links, args=(queryset,), daemon=True)
+    checker.start()
+    return 'checker has started checking'
     

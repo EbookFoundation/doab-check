@@ -5,7 +5,7 @@ from django.utils.safestring import mark_safe
 # Register your models here.
 
 from . import models
-from .check import check_link
+from .check import start_check_links
 
 
 @admin.register(models.Check)
@@ -42,8 +42,8 @@ class LinkAdmin(admin.ModelAdmin):
         
     @admin.action(description="Recheck the links")
     def recheck(self, request, queryset):
-        for link in queryset:
-            check_link(link)
+        msg = start_check_links(queryset)
+        self.message_user(request, msg)
     
     @admin.display(description="URL")
     def link_display(self, obj):
