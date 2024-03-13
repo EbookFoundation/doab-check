@@ -54,13 +54,19 @@ class ContentTyper(object):
                     return r
                 except Exception as e:
                     pass
-            elif '[Errno 60]' in str(ce):
-                return (408, '', '')
-            # unexplained error
+            elif ('TimeoutError' in str(ce) or 
+                  'ConnectionTimeout' in str(ce) or 
+                  '[Errno 60]' in str(ce)):
+                # server didn't respond in a reasonable time
+                return (524, '', '')
+            elif '[Errno 111]' in str(ce) or 'Max retries' in str(ce):
+                # I'm a teapot, I hate you
+                return (418, '', '')
+            # unexplained connection error
             logger.exception(ce)
-            return None
         except Exception as e:
             # unexplained error
+            logger.exception(type(e))
             logger.exception(e)
             return None
 
