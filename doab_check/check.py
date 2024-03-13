@@ -5,7 +5,7 @@ import logging
 import re
 import threading
 import time
-from urllib.parse import urlparse
+from urllib.parse import quote, unquote, urlparse, urlsplit, urlunsplit
 
 import requests
 
@@ -29,7 +29,17 @@ class ContentTyper(object):
 
     def content_type(self, url):
         try:
-            r = requests.head(url, allow_redirects=True, headers=HEADERS)
+            try:
+                r = requests.get(url, allow_redirects=True, headers=HEADERS)
+            except UnicodeDecodeError as ude:
+                # fallback for non-ascii, non-utf8 bytes in redirect location
+                if 'utf-8' in str(ude):
+                    (scheme, netloc, path, query, fragment) = urlsplit(url)
+                    newpath = quote(unquote(path), encoding='latin1')
+                    url = urlunsplit((scheme, netloc, newpath, query, fragment))
+                    r = requests.get(url, allow_redirects=True, headers=HEADERS)
+                    if r.status_code == 200:
+                        r.status_code = 214 # unofficial status code where url is changed
             if r.status_code == 405:
                 r =  requests.get(url, headers=HEADERS)
             return r

@@ -22,6 +22,10 @@ When a link is checked we record the status code and content type returned by th
 </p>
 <dl>
 
+<dt id='code214'>"214" indicates a unescaped redirect location. 
+<dd> When a server redirects a link it is supposed to send a valid URL in the "location" header so that the web client knows where to go. URL's should have only ascii characters - non ascii characters are url-escaped using %XX to represent non-ascii bytes. We have found that some servers send location strings with characters like "ä" (%E4 or %C3%A4 when escaped) in the location header. Most web client software does a best guess of how to interpret the bytes; so the redirection usually succeeds. ("214" is not a standard HTTP code.)
+
+
 <dt id='code301'>"301" or "302" indicates a bad redirect. 
 <dd> Redirects are used to keep links working after they've changed addresses. CrossRef links, for example, are usually redirected to the publisher's website. But sometimes the redirecting server get it wrong, and there are problems with the resolutions. Another type of problem involves chains of redirects - there might be a loop, or there might be an insecure link in the middle of an other wise secure chain of links - That used to be OK, but now it's an error.
 

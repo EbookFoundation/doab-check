@@ -41,6 +41,7 @@ View <a href="{% url 'publishers' %}">the list of publishers whose links we've c
 When a link is checked we record the status code and content type returned by the web server. 
 </p>
 <ul>
+<li><a href="{% url 'fixing' %}#code214">"214"</a> indicates an unescaped redirect. 
 <li><a href="{% url 'fixing' %}#code302">"301" or "302"</a> indicates a bad redirect. 
 <li><a href="{% url 'fixing' %}#code403">"403"</a> indicates a misconfigured server that is not allowing access to the promised resource. 
 <li><a href="{% url 'fixing' %}#code404">"404"</a> means the link is broken - the resource is not found.
