@@ -108,7 +108,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-USER_AGENT = "doab_check_bot v0.0.1 <https://github.com/EbookFoundation/doab_check>"
+USER_AGENT = "doab_check_bot v0.0.1 https://github.com/EbookFoundation/doab_check"
 
 LOGGING = {
     'version': 1,
