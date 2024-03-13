@@ -19,7 +19,7 @@ class Command(BaseCommand):
             link = Link.objects.get(url=url)
             check = check_link(link)
             self.stdout.write(
-                f'checked {url}: type is {check.content_type}, code is {check.return_code}')
+                f'checked link {link.id} {url}: type is {check.content_type}, code is {check.return_code}')
         except Link.DoesNotExist:
             code, ctype = type_for_url(url)
             self.stdout.write(
