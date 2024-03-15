@@ -40,9 +40,6 @@ When a link is checked we record the status code and content type returned by th
     </ul>
     In any case, the correct URL should be loaded to DOAB, or in the worst case, deleted.
 
-<dt id='code408'>"408" means the website didn't respond in a reasonable time.
-<dd> This might be an intermittent problem. Links get checked every month, so look at the the history of checks to see if that's so. Otherwise, you probably have a server problem.
-
 <dt id='code500'>"500" means something has gone wrong at the website server.
 <dd> you have a server problem.
 
@@ -53,10 +50,16 @@ When a link is checked we record the status code and content type returned by th
 <dd>This could happen because the server was too busy, under maintenance, or something else. Amazon's robot blocker returns 503 codes, so these must be checked manually. It may be that your server is blocking users based on the user-agent sent with the request. To make sure that DOAB Check doesn't get blocked, add "doab_check_bot" to your server's allow list.
 
 <dt id='code504'>"504" indicates that the server, while acting as a gateway or proxy did not get a response in time from an upstream server. 
-<dd>Some web server run in protected environments and only talk to the internet via a gateway or a proxy. This means that there is a problem with the communication between the web server and a server in-between.
+<dd>Some web servers run in protected environments and only talk to the internet via a gateway or a proxy. This means that there is a problem with the communication between the web server and a server in-between.
 
 <dt id='code511'>"511" indicates a problem with the security of the connection - most often an incomplete certificate.
 <dd> The <a href="https://www.ssllabs.com/ssltest/">SSL Server Test</a> can help you diagnose this problem. But beware - current we browsers often ignore some security problems, so the link might work when you try to test it. But because the browser vendors are gradually clamping down on weak security, the next update to Firefox or Chrome might start issuing warnings that you website is unsafe. Better to fix it now.
+
+<dt id='code514'>"514" means the website was pretending to be there.
+<dd> This is also known as "I am a <a href="https://en.wikipedia.org/wiki/Hyper_Text_Coffee_Pot_Control_Protocol">teapot</a>". We use this code to describe sites that try to block robots in the most annoying and self-defeating manner possible. Return 503 instead.
+
+<dt id='code524'>"524" means the website didn't respond in a reasonable time.
+<dd> This might be an intermittent problem. Links get checked every month, so look at the the history of checks to see if that's so. Otherwise, you probably have a server problem.
 
 <dt id='code0'>"None" or "0" means something has gone terribly wrong. Possibly a bug in the checker or a malformed url.
 
