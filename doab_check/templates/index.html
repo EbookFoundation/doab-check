@@ -45,7 +45,8 @@ When a link is checked we record the status code and content type returned by th
 <li><a href="{% url 'fixing' %}#code302">"301" or "302"</a> indicates a bad redirect. 
 <li><a href="{% url 'fixing' %}#code403">"403"</a> indicates a misconfigured server that is not allowing access to the promised resource. 
 <li><a href="{% url 'fixing' %}#code404">"404"</a> means the link is broken - the resource is not found.
-<li><a href="{% url 'fixing' %}#code514">"418"</a> means the website was pretending not to be there.
+<li><a href="{% url 'fixing' %}#code418">"418"</a> means the website was pretending not to be there.
+<li><a href="{% url 'fixing' %}#code429">"429"</a> means the website is getting too many requests.
 <li><a href="{% url 'fixing' %}#code500">"500"</a> means something has gone wrong at the website server.
 <li><a href="{% url 'fixing' %}#code502">"502"</a> is a gateway error. Some websites use load balancers or content distribution networks; if these gateways have a problem connecting with the source website, they send a 502 response.
 <li><a href="{% url 'fixing' %}#code503">"503"</a> means that a website couldn’t be reached. This could happen because the server was too busy, under maintenance, or something else. Amazon's robot blocker returns 503 codes, so these must be checked manually.

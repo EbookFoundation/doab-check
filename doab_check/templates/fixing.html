@@ -43,6 +43,9 @@ When a link is checked we record the status code and content type returned by th
 <dt id='code418'>"418" means the website was pretending not to be there.
 <dd> This is also known as "I am a <a href="https://en.wikipedia.org/wiki/Hyper_Text_Coffee_Pot_Control_Protocol">Teapot</a>". We use this code to describe sites that try to block robots in the most annoying and self-defeating manner possible. Return 503 instead.
 
+<dt id='code429'>"429" means the website is getting too many requests.
+<dd> Our linkchecker will not issue mor than one request ber second to any server. Unfortunately many bots are not so polite. Currently we're seeing a flood of hyper-aggressive AI-scraping data bots which are taking down systems across the library and publishing ecosystem.
+
 <dt id='code500'>"500" means something has gone wrong at the website server.
 <dd> you have a server problem.
 
