@@ -4,6 +4,7 @@
 import datetime
 import logging
 import re
+import urllib.error
 
 import pytz
 from dateutil.parser import isoparse
@@ -152,7 +153,11 @@ def load_doab_oai(from_date, until_date, limit=100):
             doab = getdoab(ident)
             if doab:
                 num_doabs += 1
-                item = add_by_doab(doab, record=record)
+                try:
+                    item = add_by_doab(doab, record=record)
+                except Exception as ex:
+                    logger.exception('unexpected error processing doab #%s: %s', doab, ex)
+                    continue
                 if not item:
                     logger.error('error for doab #%s', doab)
                     continue
@@ -160,8 +165,18 @@ def load_doab_oai(from_date, until_date, limit=100):
                     new_doabs += 1
                 title = item.title
                 logger.info(u'updated:\t%s\t%s', doab, title)
-            if num_doabs >= limit:
+            if limit is not None and num_doabs >= limit:
                 break
     except NoRecordsMatchError:
         pass
+    except urllib.error.HTTPError as e:
+        if e.code == 429:
+            retry_after = e.headers.get('Retry-After', 'unknown')
+            logger.error(
+                'DOAB OAI rate-limited (HTTP 429). '
+                'Retry-After: %s seconds. Harvest stopped after %s records.',
+                retry_after, num_doabs
+            )
+        else:
+            raise
     return num_doabs, new_doabs, lasttime
