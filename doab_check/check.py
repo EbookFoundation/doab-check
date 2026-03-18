@@ -44,9 +44,14 @@ class ContentTyper(object):
                 r =  requests.get(url, headers=HEADERS, timeout=(5, 60))
             return r
         except requests.exceptions.SSLError:
-            r = requests.get(url, verify=False, timeout=(5, 60))
-            r.status_code = 511
-            return r
+            try:
+                r = requests.get(url, verify=False, timeout=(5, 60))
+                r.status_code = 511
+                return r
+            except requests.exceptions.Timeout:
+                return (524, '', '')
+            except Exception:
+                return (511, '', '')
         except requests.exceptions.Timeout:
             return (524, '', '')
         except requests.exceptions.ConnectionError as ce:
