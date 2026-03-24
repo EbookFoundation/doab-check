@@ -30,27 +30,34 @@ class ContentTyper(object):
     def content_type(self, url):
         try:
             try:
-                r = requests.get(url, allow_redirects=True, headers=HEADERS)
+                r = requests.get(url, allow_redirects=True, headers=HEADERS, timeout=(5, 60))
             except UnicodeDecodeError as ude:
                 # fallback for non-ascii, non-utf8 bytes in redirect location
                 if 'utf-8' in str(ude):
                     (scheme, netloc, path, query, fragment) = urlsplit(url)
                     newpath = quote(unquote(path), encoding='latin1')
                     url = urlunsplit((scheme, netloc, newpath, query, fragment))
-                    r = requests.get(url, allow_redirects=True, headers=HEADERS)
+                    r = requests.get(url, allow_redirects=True, headers=HEADERS, timeout=(5, 60))
                     if r.status_code == 200:
                         r.status_code = 214 # unofficial status code where url is changed
             if r.status_code == 405:
-                r =  requests.get(url, headers=HEADERS)
+                r =  requests.get(url, headers=HEADERS, timeout=(5, 60))
             return r
         except requests.exceptions.SSLError:
-            r = requests.get(url, verify=False)
-            r.status_code = 511
-            return r
+            try:
+                r = requests.get(url, verify=False, timeout=(5, 60))
+                r.status_code = 511
+                return r
+            except requests.exceptions.Timeout:
+                return (524, '', '')
+            except Exception:
+                return (511, '', '')
+        except requests.exceptions.Timeout:
+            return (524, '', '')
         except requests.exceptions.ConnectionError as ce:
             if '[Errno 8]' in str(ce) or '[Errno -2]' in str(ce):
                 try:
-                    r = requests.get(url, allow_redirects=False, headers=HEADERS)
+                    r = requests.get(url, allow_redirects=False, headers=HEADERS, timeout=(5, 60))
                     return r
                 except Exception as e:
                     pass
