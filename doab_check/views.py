@@ -42,6 +42,7 @@ class ProblemsView(generic.TemplateView):
 
         problems = Link.objects.exclude(recent_check__isnull=True
             ).filter(recent_check__return_code__exact=code, live=True
+            ).select_related('recent_check'
             ).order_by('provider').annotate(title=F('items__title'))
         providers = problems.values('provider').distinct().annotate(
             link_count=Count('provider'))
