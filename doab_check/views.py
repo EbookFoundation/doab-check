@@ -48,7 +48,7 @@ class ProblemsView(generic.TemplateView):
             link_count=Count('provider'))
         for provider in providers:
             provider['links'] = problems.filter(
-                provider=provider['provider'])[:100]
+                provider=provider['provider']).order_by('url')[:100]
         return {'code': code, 'providers': providers}
 
 
