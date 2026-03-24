@@ -15,20 +15,20 @@ class HomepageView(generic.TemplateView):
     template_name = 'index.html'
 
     def get_context_data(self, **kwargs):
-        active_links = Link.objects.filter(recent_check__isnull=False, live=True
-            ).only('recent_check').order_by('-recent_check__return_code')
-        codes = active_links.values(
-            'recent_check__return_code').distinct()
+        active_links = Link.objects.filter(recent_check__isnull=False, live=True)
         num_checked = active_links.count()
         items = Item.objects.filter(status=1)
         num_items = items.count()
         num_bad_items = active_links.exclude(recent_check__return_code=200).values('items'
             ).distinct().count()
 
+        codes = active_links.values(
+            'recent_check__return_code'
+        ).annotate(
+            count=Count('id')
+        ).order_by('-recent_check__return_code')
+
         for code in codes:
-            code['count'] = active_links.filter(
-                recent_check__return_code=code['recent_check__return_code'],
-            ).count()
             code['percent'] = '{:.2%}'.format(code['count'] / num_checked)
         return {'num_checked': num_checked, 'codes': codes,
                 'num_items': num_items, 'num_bad_items': num_bad_items}
@@ -39,14 +39,15 @@ class ProblemsView(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         code = kwargs['code']
-        
+
         problems = Link.objects.exclude(recent_check__isnull=True
             ).filter(recent_check__return_code__exact=code, live=True
             ).order_by('provider').annotate(title=F('items__title'))
-        providers = problems.values('provider').distinct().annotate(Count('provider'))
+        providers = problems.values('provider').distinct().annotate(
+            link_count=Count('provider'))
         for provider in providers:
-            provider['links'] = problems.filter(provider=provider['provider'])
-            #provider['count'] = provider['links'].count()
+            provider['links'] = problems.filter(
+                provider=provider['provider'])[:100]
         return {'code': code, 'providers': providers}
 
 
