@@ -343,6 +343,7 @@ class Command(BaseCommand):
                 # 7c. Remote fetch (DB-free)
                 remote_calls += 1
                 record = None
+                stop_after_this_record = False  # set True on 429-recovered path
                 try:
                     record = get_doab_record_safe(doab_id)
                 except _PyOAIRateLimitedError as e:
@@ -350,9 +351,14 @@ class Command(BaseCommand):
                         e, doab_id, state, opt['max_retry_after']
                     )
                     if exit_reason == 'recovered':
+                        # Slept the Retry-After, attempt one final fetch, then
+                        # exit regardless of outcome — DOAB asked us to slow
+                        # down; we honor the wait but don't keep probing.
                         try:
                             record = get_doab_record_safe(doab_id)
                             remote_calls += 1
+                            exit_reason = '429_recovered_single_record'
+                            stop_after_this_record = True
                         except Exception:
                             mark_retry(state, doab_id, '429_after_wait')
                             recompute_totals(state)
@@ -407,14 +413,24 @@ class Command(BaseCommand):
                     processed_in_run += 1
                     recompute_totals(state)
                     save_state(opt['state_file'], state)
+                    if stop_after_this_record:
+                        break
                     continue
 
-                # 7e. Local DB write — narrowly scoped transaction
+                # OAI says deleted (header status=deleted) or no metadata —
+                # treat as gone directly. add_by_doab() would otherwise call
+                # set_deleted() which returns None when the local Item
+                # doesn't exist, and we'd lose this signal as error_review.
+                record_is_deleted = record[0].isDeleted() or not record[1]
+
+                # 7e. Local DB write. add_by_doab() handles record[0].isDeleted()
+                # via set_deleted() internally and may make HTTP calls along the
+                # way; transaction.atomic() therefore *does* hold a DB tx during
+                # those HTTP calls. We accept the trade-off: per-record
+                # atomicity > the in-transaction HTTP cost; add_by_doab is
+                # idempotent so a partial-state retry is safe.
                 try:
                     with transaction.atomic():
-                        # add_by_doab also handles record[0].isDeleted() via
-                        # set_deleted(); accept either Item (added or marked
-                        # deleted) as a valid outcome.
                         item = doab_oai.add_by_doab(doab_id, record=record)
                 except IntegrityError:
                     if Item.objects.filter(doab=doab_id, status=1).exists():
@@ -423,6 +439,8 @@ class Command(BaseCommand):
                         processed_in_run += 1
                         recompute_totals(state)
                         save_state(opt['state_file'], state)
+                        if stop_after_this_record:
+                            break
                         continue
                     logger.exception('IntegrityError but ID still absent: %s', doab_id)
                     unknown_errors += 1
@@ -439,6 +457,8 @@ class Command(BaseCommand):
                     processed_in_run += 1
                     recompute_totals(state)
                     save_state(opt['state_file'], state)
+                    if stop_after_this_record:
+                        break
                     continue
                 except Exception as e:
                     logger.exception('Unknown exception loading %s', doab_id)
@@ -449,21 +469,48 @@ class Command(BaseCommand):
                     exit_reason = 'unknown_exception_halt'
                     break
 
-                # 7f. Categorize write result
-                if item is None:
-                    mark_terminal(state, doab_id, 'error_review',
-                                  last_error='add_by_doab returned None')
-                elif getattr(item, 'status', 1) == 0:
-                    # Record came back and was set_deleted — count as gone, not ok
+                # 7f. Categorize write result.
+                #
+                # Four cases based on (record.isDeleted, item, item.status):
+                #
+                # 1. record deleted, item is None
+                #    → DOAB says deleted AND we never had it. set_deleted()
+                #      logged 'no item' and returned None. Mark 'gone'.
+                # 2. record deleted, item is not None
+                #    → DOAB says deleted, we had it (status now 0 from
+                #      set_deleted). Mark 'gone'.
+                # 3. record active, item is None
+                #    → load_doab_record returned None for an active record —
+                #      genuine loader anomaly. error_review.
+                # 4. record active, item.status == 0
+                #    → BUG in load_doab_record: get_or_create found existing
+                #      row with status=0 from a prior delete and never reset
+                #      it to 1. Patch here in backfill: flip status=1, mark
+                #      'ok'. (Loader fix is a separate concern.)
+                # 5. record active, item.status == 1
+                #    → normal happy path. Mark 'ok'.
+                if record_is_deleted:
                     mark_terminal(state, doab_id, 'gone',
-                                  note='set_deleted_after_fetch')
+                                  note='oai_marked_deleted')
                     gone_in_run += 1
+                elif item is None:
+                    mark_terminal(state, doab_id, 'error_review',
+                                  last_error='add_by_doab returned None for active record')
+                elif getattr(item, 'status', 1) == 0:
+                    # Active in DOAB but locally still status=0 — fix it here.
+                    item.status = 1
+                    item.save(update_fields=['status'])
+                    mark_terminal(state, doab_id, 'ok',
+                                  item_id=getattr(item, 'id', None),
+                                  note='status_flipped_0_to_1')
                 else:
                     mark_terminal(state, doab_id, 'ok',
                                   item_id=getattr(item, 'id', None))
                 processed_in_run += 1
                 recompute_totals(state)
                 save_state(opt['state_file'], state)
+                if stop_after_this_record:
+                    break
         finally:
             state['last_run'] = {
                 'started_at': run_started,
