@@ -6,6 +6,10 @@ name = "pypi"
 [packages]
 django = "*"
 psycopg2 = "*"
+# pyoai (and our EbookFoundation/pyoai fork) calls
+# XPathElementEvaluator.evaluate(), removed in lxml 5+. Pin lxml until
+# pyoai upstream is patched (see infrae/pyoai#59).
+lxml = "<5"
 pyoai = {editable = true, ref = "bf709d26ae6e4b34b9b0ca726e0f032d97f0bd38", git = "git+https://github.com/EbookFoundation/pyoai.git"}
 requests = "*"
 gunicorn = "*"
