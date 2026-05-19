@@ -18,6 +18,7 @@ graph, just Item + Link rows from oai_dc metadata.
 
 import argparse
 import datetime
+import email.utils
 import hashlib
 import json
 import logging
@@ -56,6 +57,32 @@ TERMINAL = ('ok', 'gone', 'present_locally', 'error_review')
 # Non-terminal: 'retry' (re-attempt next run); absent = not yet attempted
 
 DEFAULT_RETRY_AFTER_SECS = 60
+
+
+def parse_retry_after(raw):
+    """Parse a Retry-After header per RFC 9110 §10.2.3 — delta-seconds OR an
+    HTTP-date. Returns int seconds (>= 0) or None. doab-check has no shared
+    parser (the pyoai fork pre-parses retry_after_seconds for the fork path);
+    this exists so the stock-pyoai HTTPError fallback does not collapse a
+    multi-hour date ban to DEFAULT_RETRY_AFTER_SECS via a bare int()."""
+    if not raw:
+        return None
+    raw = raw.strip()
+    try:
+        return max(0, int(raw))
+    except ValueError:
+        pass
+    try:
+        target = email.utils.parsedate_to_datetime(raw)
+    except (TypeError, ValueError):
+        return None
+    if target is None:
+        return None
+    if target.tzinfo is None:
+        target = target.replace(tzinfo=datetime.timezone.utc)
+    now = datetime.datetime.now(datetime.timezone.utc)
+    return max(0, int((target - now).total_seconds()))
+
 
 # Accepts: '20.500.12854/N', 'N.M' suffix versions, or prefixed forms
 ID_RE = re.compile(r'^(?:oai:(?:directory\.doabooks\.org|doab-books):)?'
@@ -299,7 +326,13 @@ class Command(BaseCommand):
             )
             return
         if deadline and now >= deadline:
-            clear_sentinel()
+            live = clear_sentinel()
+            if live and not opt['ignore_retry_after']:
+                self.stdout.write(
+                    f"SKIP: DOAB OAI rate-limited until {live.isoformat()} "
+                    f"(concurrent writer; shared sentinel)."
+                )
+                return
 
         # --- 7. Per-record loop -----------------------------------------------
         run_started = _now_iso()
@@ -359,8 +392,15 @@ class Command(BaseCommand):
                             remote_calls += 1
                             exit_reason = '429_recovered_single_record'
                             stop_after_this_record = True
-                        except Exception:
-                            mark_retry(state, doab_id, '429_after_wait')
+                        except Exception as e2:
+                            # The courtesy retry itself failed. If it is another
+                            # rate-limit, DOAB may now want a LONGER wait than
+                            # the first Retry-After — extend the shared sentinel
+                            # (monotonic) so the next run honors the new ban
+                            # instead of re-hitting a still-banned endpoint.
+                            self._extend_sentinel_from_exc(e2)
+                            mark_retry(state, doab_id,
+                                       f'429_after_wait: {type(e2).__name__}')
                             recompute_totals(state)
                             save_state(opt['state_file'], state)
                             exit_reason = '429_after_wait_still_failing'
@@ -379,10 +419,10 @@ class Command(BaseCommand):
                         # write the shared sentinel and exit cleanly, no
                         # retry. The next run will honor the sentinel.
                         retry_after = e.headers.get('Retry-After') if e.headers else None
-                        try:
-                            secs = int(retry_after) if retry_after else DEFAULT_RETRY_AFTER_SECS
-                        except (TypeError, ValueError):
-                            secs = DEFAULT_RETRY_AFTER_SECS
+                        # RFC 9110 §10.2.3: delta-seconds OR HTTP-date. Bare
+                        # int() collapses a multi-hour date ban to
+                        # DEFAULT_RETRY_AFTER_SECS.
+                        secs = parse_retry_after(retry_after) or DEFAULT_RETRY_AFTER_SECS
                         deadline = _now_utc() + datetime.timedelta(seconds=secs)
                         write_block_deadline(deadline, stderr=self.stderr)
                         mark_retry(state, doab_id,
@@ -430,12 +470,15 @@ class Command(BaseCommand):
                 # doesn't exist, and we'd lose this signal as error_review.
                 record_is_deleted = record[0].isDeleted() or not record[1]
 
-                # 7e. Local DB write. add_by_doab() handles record[0].isDeleted()
-                # via set_deleted() internally and may make HTTP calls along the
-                # way; transaction.atomic() therefore *does* hold a DB tx during
-                # those HTTP calls. We accept the trade-off: per-record
-                # atomicity > the in-transaction HTTP cost; add_by_doab is
-                # idempotent so a partial-state retry is safe.
+                # 7e. Local DB write, wrapped in transaction.atomic(). Unlike
+                # regluit's loader, doab-check's add_by_doab -> load_doab_record
+                # is PURE DB: get_or_create on Item/Timestamp/Link with no HTTP
+                # (link-liveness is a separate check_items process). So the
+                # transaction is held for milliseconds across the multi-table
+                # write only — atomicity here is cheap and correct (Item +
+                # Timestamps + Links commit together or not at all). It also
+                # handles record[0].isDeleted() via set_deleted() internally.
+                # add_by_doab is idempotent so a partial-state retry is safe.
                 try:
                     with transaction.atomic():
                         item = doab_oai.add_by_doab(doab_id, record=record)
@@ -548,6 +591,24 @@ class Command(BaseCommand):
             sys.exit(1)
 
     # --- helpers -------------------------------------------------------------
+
+    def _extend_sentinel_from_exc(self, exc):
+        """Persist a Retry-After carried by exc (fork RateLimitedError or
+        stock HTTPError 429). write_block_deadline is monotonic, so this only
+        ever lengthens an active ban, never shortens it. Non-rate-limit
+        exceptions fall back to DEFAULT_RETRY_AFTER_SECS so a failed courtesy
+        retry still imposes a brief cool-off rather than zero."""
+        secs = None
+        if isinstance(exc, _PyOAIRateLimitedError):
+            secs = getattr(exc, 'retry_after_seconds', None)
+        elif isinstance(exc, urllib.error.HTTPError) and exc.code == 429:
+            raw = exc.headers.get('Retry-After') if exc.headers else None
+            secs = parse_retry_after(raw)
+        if not secs:
+            secs = DEFAULT_RETRY_AFTER_SECS
+        write_block_deadline(
+            _now_utc() + datetime.timedelta(seconds=secs), stderr=self.stderr
+        )
 
     def _handle_rate_limit(self, exc, doab_id, state, max_retry_after):
         """Apply Retry-After policy. Returns exit_reason or 'recovered'."""
